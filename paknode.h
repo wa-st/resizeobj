@@ -151,10 +151,10 @@ public:
 
 	std::vector<PakNode*>* items(){ return &m_items;}
 	std::string type() const{ return m_type; }
-	void type(const std::string value){ m_type = value; };
+	void setType(const std::string value){ m_type = value; };
 	std::vector<char>* data(){ return &m_data; }
-	PakData* data_p(){ return pointer_cast<PakData*>(&m_data[0]); }
-	const PakData* data_p() const{ return pointer_cast<const PakData*>(&m_data[0]); }
+	PakData* dataP(){ return pointer_cast<PakData*>(&m_data[0]); }
+	const PakData* dataP() const{ return pointer_cast<const PakData*>(&m_data[0]); }
 
 	typedef std::vector<PakNode*>::iterator iterator;
 	typedef std::vector<PakNode*>::const_iterator const_iterator;
@@ -170,19 +170,6 @@ public:
 	const_iterator end() const{ return m_items.end(); };
 };
 
-/*
-class PakDataNode: public PakNode
-{
-
-protected:
-	void loadData(std::istream &src, int size);
-	void writeData(std::ostream &dest) const;
-public:
-
-	void clear();
-
-};
-*/
 
 class PakFile
 {
@@ -199,11 +186,11 @@ public:
 
 		PakNode& root(){ return m_root; }
 		std::string signature() const{ return m_signature; }
-		void signature(const std::string value){ m_signature = value; }
+		void setSignature(const std::string value){ m_signature = value; }
 		int version() const{ return m_version; }
 };
 
-inline int GetPakNodeVer(unsigned short v)
+inline int getPakNodeVer(unsigned short v)
 {
 	return (v & 0x8000)? v & 0x7FFF : 0;
 }

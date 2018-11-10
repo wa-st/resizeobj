@@ -6,18 +6,10 @@
 
 class TileConverter
 {
-public:
-	// アニメーションを無効化する
-	void noAnimation(bool val){ m_noAnimation = val; };
-	bool noAnimation(){return m_noAnimation; }
-	// カーソル画像・フィールド縮小用
-	void imgConverter(ImgConverter *ic){ m_ic = ic; };
-
-	// アドオンを変換する
-	void convertAddon(PakNode *node) const { convertNodeTree(node); };
-protected:
+private:
 	bool m_noAnimation;
 	ImgConverter *m_ic;
+protected:
 	void convertNodeTree(PakNode *node) const;
 	void convertFactorySmoke(PakNode *node) const;
 	void convertBuil(PakNode *node) const;
@@ -28,6 +20,15 @@ protected:
 		int bx, int by, int maxHeight, int width, int height, int version) const;
 
 	void convertSmokeTreeImage(PakNode *node) const;
+public:
+	// アニメーションを無効化する
+	void setNoAnimation(bool val){ m_noAnimation = val; };
+	bool noAnimation(){return m_noAnimation; }
+	// カーソル画像・フィールド縮小用
+	void imgConverter(ImgConverter *ic){ m_ic = ic; };
+
+	// アドオンを変換する
+	void convertAddon(PakNode *node) const { convertNodeTree(node); };
 };
 
 /// bmpの領域[x,y, +width, + height]にSIMU_TRANSPARENT以外のドットがあれば真を返す。

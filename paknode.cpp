@@ -20,13 +20,13 @@ template<class T> inline T readnum(std::istream &s)
 std::string readsstrlen(std::istream &s, int len)
 {
 	std::string x;
-	for(;len>0; len--)
+	for(;len > 0; len--)
 	{
 		int ch = s.get();
-		if(ch=='\0')
+		if(ch == '\0')
 		{
 			len--;
-			for(;len>0; len--) s.get();
+			for(;len > 0; len--) s.get();
 			break;
 		}
 		x += (char)ch;
@@ -37,7 +37,7 @@ std::string readsstrlen(std::istream &s, int len)
 void writestrlen(std::ostream &o, const std::string& str, int len)
 {
 	o.write(str.data(), std::min(static_cast<int>(str.length()), len));
-	for(len -= str.length(); len>0; len--) o.put('\0');
+	for(len -= str.length(); len > 0; len--) o.put('\0');
 }
 
 /*   PakNode    */
@@ -67,11 +67,11 @@ void PakNode::load(std::istream &src)
 	m_type = readsstrlen(src, NODE_NAME_LENGTH);
 	count  = readnum<unsigned short>(src);
 	size   = readnum<unsigned short>(src);
-	if(size==LARGE_RECORD_SIZE)
+	if(size == LARGE_RECORD_SIZE)
 		size = readnum<unsigned int>(src);
 
 	loadData(src, size);
-	for(int i=0; i<count; i++)
+	for(int i = 0; i < count; i++)
 	{
 		PakNode* node = new PakNode();
 		m_items.push_back(node);
@@ -96,9 +96,9 @@ void PakNode::save(std::ostream &dest) const
 		dest.write(pointer_cast<char*>(&size), 4);
 	}
 
-	if(size) dest.write(pointer_cast<const char*>(data_p()), size);
+	if(size) dest.write(pointer_cast<const char*>(dataP()), size);
 
-	for(const_iterator it = begin(); it!=end(); it++) (*it)->save(dest);
+	for(const_iterator it = begin(); it != end(); it++) (*it)->save(dest);
 }
 
 void PakNode::clear()
@@ -120,12 +120,6 @@ void PakNode::loadData(std::istream &src, int size)
 		src.read(reinterpret_cast<char*>(&m_data[0]), size);
 }
 
-//void PakNode::writeData(std::ostream &dest) const
-//{
-//	if(m_data.size())
-//		dest.write(reinterpret_cast<const char*>(&m_data[0]), m_data.size());
-//}
-
 /* PakFile */
 
 void PakFile::load(std::istream &src)
@@ -134,7 +128,7 @@ void PakFile::load(std::istream &src)
 	while(!src.fail())
 	{
 		int ch = src.get();
-		if (ch=='\x1A') break;
+		if (ch == '\x1A') break;
 		m_signature += static_cast<char>(ch);
 	}
 	if(strncmp(m_signature.c_str(), SIMU_SIGNATURE, strlen(SIMU_SIGNATURE)))
@@ -163,7 +157,7 @@ void PakFile::save(std::ostream &dest) const
 void PakFile::saveToFile(const std::string filename) const
 {
 	std::ofstream dest(filename.c_str(), std::ios::out | std::ios::binary);
-	if(dest.fail()) throw std::runtime_error(std::string("ファイルを開けません。: ")+filename);
+	if(dest.fail()) throw std::runtime_error(std::string("ファイルを開けません。: ") + filename);
 	save(dest);
 	dest.close();
 }

@@ -35,7 +35,7 @@ void ImgConverter::convertImage(PakNode *node) const
 	SimuImage image;
 	image.load(*node->data());
 
-	if(image.data.size()>0)
+	if(image.data.size() > 0)
 	{
 		if(image.zoomable)
 		{
@@ -51,14 +51,13 @@ void ImgConverter::convertImage(PakNode *node) const
 bool ImgConverter::cutImageMargin(SimuImage &image) const
 {
 	// IMG ver2以降では右余白を記録しなくなったので、変換の必要性なし。
-	if(image.version>=2)
-		return false;
+	if(image.version >= 2) return false;
 
 	int l, r;
 	calcImageColMargin(image.height, image.data.begin(), l, r);
 
 	// 下側・右側にtileSize/2以上の余白があれば……
-	if(image.height<= newTileSize() && r >= newTileSize())
+	if(image.height <= newTileSize() && r >= newTileSize())
 	{
 		int x, y, w, h;
 		// 一度ビットマップに展開して……
@@ -83,46 +82,46 @@ void ImgConverter::shrinkImage(SimuImage &data) const
 
 	// 画像の位置・サイズを偶数にそろえる為のパディングを計算する
 	int leftPadding =  offsetX128 & 1;
-	int rightPadding = (offsetX128 + srcImgWidth)&1;
+	int rightPadding = (offsetX128 + srcImgWidth) & 1;
 	int topPadding   = offsetY128 & 1;
-	int bottomPadding = (offsetY128 + srcImgHeight)&1;
+	int bottomPadding = (offsetY128 + srcImgHeight) & 1;
 	
 	// パディングを加えたサイズでビットマップを用意し、そこに展開
-	MemoryBitmap<PIXVAL> bmp128(leftPadding + srcImgWidth + rightPadding, topPadding+srcImgHeight+bottomPadding);
+	MemoryBitmap<PIXVAL> bmp128(leftPadding + srcImgWidth + rightPadding, topPadding + srcImgHeight + bottomPadding);
 	bmp128.clear(SIMU_TRANSPARENT);
 	data.drawTo(leftPadding, topPadding, bmp128);
 
 	// 画像を縮小
-	MemoryBitmap<PIXVAL> bmp64(bmp128.width()/2, bmp128.height()/2);
+	MemoryBitmap<PIXVAL> bmp64(bmp128.width() / 2, bmp128.height() / 2);
 	PIXVAL cols[4];
-	for(int iy=0; iy<bmp64.height(); ++iy)
+	for(int iy = 0; iy < bmp64.height(); iy++)
 	{
-		for(int ix = 0; ix <bmp64.width(); ++ix)
+		for(int ix = 0; ix <bmp64.width(); ix++)
 		{
-			cols[0] = bmp128.pixel(ix*2  , iy*2  );
-			cols[1] = bmp128.pixel(ix*2+1, iy*2  );
-			cols[2] = bmp128.pixel(ix*2  , iy*2+1);
-			cols[3] = bmp128.pixel(ix*2+1, iy*2+1);
+			cols[0] = bmp128.pixel(ix * 2    , iy * 2);
+			cols[1] = bmp128.pixel(ix * 2 + 1, iy * 2);
+			cols[2] = bmp128.pixel(ix * 2    , iy * 2 + 1);
+			cols[3] = bmp128.pixel(ix * 2 + 1, iy * 2 + 1);
 
 			bmp64.pixel(ix, iy) = mixPixel(cols);
 		}
 	}
 
 	// 画像をエンコード
-	int offsetX64 = (offsetX128 - leftPadding)/2;
-	int offsetY64 = (offsetY128 -  topPadding)/2;
+	int offsetX64 = (offsetX128 - leftPadding) / 2;
+	int offsetY64 = (offsetY128 - topPadding) / 2;
 	data.encodeFrom(bmp64, offsetX64, offsetY64, false);
 }
 
 
 PIXVAL calcSpecialColor(PIXVAL cols[])
 {
-	for(int i = 0; i<3; i++)
+	for(int i = 0; i < 3; i++)
 	{
 		PIXVAL c = cols[i];
-		if(c& SIMU_SPECIALMASK && c != SIMU_TRANSPARENT)
+		if(c & SIMU_SPECIALMASK && c != SIMU_TRANSPARENT)
 		{
-			for(int j=i+1; j<4; j++)
+			for(int j= i + 1; j < 4; j++)
 				if(c == cols[j]) return c;
 		}
 	}
@@ -131,7 +130,7 @@ PIXVAL calcSpecialColor(PIXVAL cols[])
 
 PIXVAL ImgConverter::mixPixel(PIXVAL cols[]) const
 {
-	if(cols[0] ==SIMU_TRANSPARENT || m_alpha==0)
+	if(cols[0] == SIMU_TRANSPARENT || m_alpha == 0)
 	{
 		// 左上が透過色の場合・アンチエイリアスなしの場合は左上の値をそのまま利用する
 		return cols[0];
@@ -150,27 +149,27 @@ PIXVAL ImgConverter::mixPixel(PIXVAL cols[]) const
 		int red = 0;
 		int green = 0;
 		int blue = 0;
-		int t=0;
-		for(int i = 0; i<4; i++)
+		int t = 0;
+		for(int i = 0; i < 4; i++)
 		{
 			if(cols[i] != SIMU_TRANSPARENT)
 			{
 				PIXVAL col = toRGB(cols[i]);
-				red  += col & SIMU_REDMASK;
-				green+= col & SIMU_GREENMASK;
+				red += col & SIMU_REDMASK;
+				green += col & SIMU_GREENMASK;
 				blue += col & SIMU_BLUEMASK;
 				t++;
 			}
 		}
-		red  /=t;
-		green/=t;
-		blue /=t;
-		if(m_alpha!=MAX_ALPHA)
+		red  /= t;
+		green /= t;
+		blue /= t;
+		if(m_alpha != MAX_ALPHA)
 		{
 			PIXVAL col = toRGB(cols[0]);
-			red   = ((col & SIMU_REDMASK)   * (MAX_ALPHA-m_alpha) + red   * m_alpha)/MAX_ALPHA;
-			green = ((col & SIMU_GREENMASK) * (MAX_ALPHA-m_alpha) + green * m_alpha)/MAX_ALPHA;
-			blue  = ((col & SIMU_BLUEMASK)  * (MAX_ALPHA-m_alpha) + blue  * m_alpha)/MAX_ALPHA;
+			red   = ((col & SIMU_REDMASK)   * (MAX_ALPHA - m_alpha) + red   * m_alpha) / MAX_ALPHA;
+			green = ((col & SIMU_GREENMASK) * (MAX_ALPHA - m_alpha) + green * m_alpha) / MAX_ALPHA;
+			blue  = ((col & SIMU_BLUEMASK)  * (MAX_ALPHA - m_alpha) + blue  * m_alpha) / MAX_ALPHA;
 		}
 		return (red & SIMU_REDMASK)|(green & SIMU_GREENMASK)|(blue & SIMU_BLUEMASK);
 	}

@@ -19,12 +19,12 @@ public:
 	void convertAddon(PakNode *node) const{convertNodeTree(node); };
 
 	int alpha() const{ return m_alpha; }
-	void alpha(int value){ m_alpha = value; }
+	void setAlpha(int value){ m_alpha = value; }
 	int newTileSize() const{ return m_newTileSize; }
-	void newTileSize(int value){ m_newTileSize = value; }
+	void setNewTileSize(int value){ m_newTileSize = value; }
 	int oldTileSize() const{ return m_newTileSize*2; }
 	SCConvMode specialColorMode() const{return m_specialColorMode; }
-	void specialColorMode(SCConvMode value){ m_specialColorMode = value; }
+	void setSpecialColorMode(SCConvMode value){ m_specialColorMode = value; }
 private:
 	int m_alpha;
 	int m_newTileSize;

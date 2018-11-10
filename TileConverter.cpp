@@ -2,8 +2,8 @@
 #include "TileConverter.h"
 #include "VhclConverter.h"
 
-const char *TILECONV_ERROR_UNSUPPORTED_VERSION = "原寸モードが対応していないバージョンのPAKファイルです";
-const char *TILECONV_ERROR_UNSUPPORTED_TYPE    = "原寸モードが対応していない形式のPAKファイルです";
+const char *TILECONV_ERROR_UNSUPPORTED_VERSION = "原寸大モードが対応していないバージョンのPAKファイルです";
+const char *TILECONV_ERROR_UNSUPPORTED_TYPE    = "原寸大モードが対応していない形式のPAKファイルです";
 
 // haus_besch.h(rev.2615)から
 enum utyp
@@ -78,7 +78,7 @@ const char *utypNames[] = {
 	"stop",
 	"extension"};
 
-inline const char *utype2str(utyp u)
+inline const char *utypeToStr(utyp u)
 {
 	if(u<lengthof(utypNames))
 		return utypNames[u];
@@ -88,7 +88,7 @@ inline const char *utype2str(utyp u)
 
 void TileConverter::convertNodeTree(PakNode *node) const
 {
-	if(node->type()=="BUIL")
+	if(node->type() == "BUIL")
 	{
 		convertBuil(node);
 	}
@@ -112,7 +112,7 @@ void TileConverter::convertNodeTree(PakNode *node) const
 
 void TileConverter::convertFactorySmoke(PakNode *node) const
 {
-	PakFactorySmoke* pfs = &node->data_p()->fsmo;
+	PakFactorySmoke* pfs = &node->dataP()->fsmo;
 	// SmokeTileは単純に倍にする
 	pfs->tileX *= 2;
 	pfs->tileY *= 2;
@@ -126,7 +126,7 @@ void TileConverter::convertFactorySmoke(PakNode *node) const
 		// SmokeOffset.x +(-3～+3) と SmokeOffset.y +(-13～3)はsint8の範囲でないと困る
 		const char *emptyXREF = "SMOK\0\0";
 		node->clear();
-		node->type("XREF");
+		node->setType("XREF");
 		node->data()->assign(emptyXREF, emptyXREF + 6);
 	}
 }
@@ -138,8 +138,8 @@ void TileConverter::convertSmokeTreeImage(PakNode *node) const
 		SimuImage image;
 		image.load(*node->data());
 
-		image.x -= m_ic->oldTileSize()/4;
-		image.y -= m_ic->oldTileSize()/4;
+		image.x -= m_ic->oldTileSize()/ 4;
+		image.y -= m_ic->oldTileSize()/ 4;
 		image.save(*node->data());
 	}
 	else
@@ -159,13 +159,13 @@ void TileConverter::convertBuil(PakNode *node) const
 	　　　 └ IMG1[高さ]
 	　　　　　 └ IMG[アニメーション]
 	*/
-	PakBuilding *header = &node->data_p()->buil;
+	PakBuilding *header = &node->dataP()->buil;
 
 	int layouts, x, y;
 	utyp ut;
 
 	// ヘッダから必要な値を取ってくるとともにDimsを変換
-	switch(GetPakNodeVer(header->ver1_6.version))
+	switch(getPakNodeVer(header->ver1_6.version))
 	{
 	case 0:
 		ut = static_cast<utyp>(header->ver0.utype);
@@ -181,6 +181,7 @@ void TileConverter::convertBuil(PakNode *node) const
 	case 4:
 	case 5:
 	case 6:
+	case 7:
 		ut = static_cast<utyp>(header->ver1_6.utype);
 		x = header->ver1_6.x;
 		y = header->ver1_6.y;
@@ -215,7 +216,7 @@ void TileConverter::convertBuil(PakNode *node) const
 	default:
 		std::ostringstream os;
 		os << (ut<last_haus_typ ? TILECONV_ERROR_UNSUPPORTED_TYPE : TILECONV_ERROR_UNSUPPORTED_VERSION);
-		os << "\nType:" << utype2str(ut) << " (" << static_cast<int>(ut) << ")"; 
+		os << "\nType:" << utypeToStr(ut) << " (" << static_cast<int>(ut) << ")"; 
 		throw std::runtime_error(os.str());
 	}
 
@@ -230,46 +231,46 @@ void TileConverter::convertBuil(PakNode *node) const
 
 	std::vector<PakNode*> *nodes = node->items();
 	// 子ノードを拡張
-	nodes->reserve(nodes->size()*4);
-	for(int il=0; il<layouts; il++)
+	nodes->reserve(nodes->size() * 4);
+	for(int il=0; il < layouts; il++)
 	{
 		int height = il&1 ? x : y;
 		int width  = il&1 ? y : x;
 
-		for(int iy=0; iy<height; iy++)
+		for(int iy=0; iy < height; iy++)
 		{
-			PakNode::iterator it = nodes->begin() + t + (iy + il*height)*width*4;
-			for(int ix=0; ix<width; ix++) it = nodes->insert(it+1, static_cast<PakNode*>(0)) + 1;
-			nodes->insert(it, width*2, 0);
+			PakNode::iterator it = nodes->begin() + t + (iy + il * height) * width * 4;
+			for(int ix = 0; ix < width; ix++) it = nodes->insert(it + 1, static_cast<PakNode*>(0)) + 1;
+			nodes->insert(it, width * 2, 0);
 		}
 	}
 
 	// TILEノードを変換
-	PakNode::iterator it  = nodes->begin()+t;
-	for(int il=0; il<layouts; il++)
+	PakNode::iterator it  = nodes->begin() + t;
+	for(int il = 0; il < layouts; il++)
 	{
-		int h = il&1 ? x : y;
-		int w  = il&1 ? y : x;
+		int h = (il & 1)? x : y;
+		int w  = (il & 1)? y : x;
 
-		for(int iy=0; iy<h; iy++)
+		for(int iy = 0; iy < h; iy++)
 		{
-			for(int ix=0; ix<w; ix++)
+			for(int ix = 0; ix < w; ix++)
 			{
 				// 古いタイルノード１個から新しいタイルノード４個を作成
 				PakNode *oldTileNode = it[0];
 				PakNode *newTileNodes[4];
-				for(int i=0; i<4; i++) newTileNodes[i] = new PakNode("TILE");
+				for(int i = 0; i < 4; i++) newTileNodes[i] = new PakNode("TILE");
 				it[    0] = newTileNodes[0];
 				it[    1] = newTileNodes[1];
 				it[w*2  ] = newTileNodes[2];
 				it[w*2+1] = newTileNodes[3];
 
-				convertTile(il, ix, iy, newTileNodes, oldTileNode, w*2, h*2);
+				convertTile(il, ix, iy, newTileNodes, oldTileNode, w * 2, h * 2);
 
 				delete oldTileNode;
 				it += 2;
 			}
-			it += w*2;
+			it += w * 2;
 		}
 	}
 
@@ -278,21 +279,21 @@ void TileConverter::convertBuil(PakNode *node) const
 	for(PakNode::iterator it = node->begin(); it != node->end(); it++)
 	{
 		PakNode *node = *it;
-		if(node->type()=="CURS") m_ic->convertAddon(node);
+		if(node->type() == "CURS") m_ic->convertAddon(node);
 	}
 };
 
 void TileConverter::convertTile(int layout, int x, int y,
 		PakNode *tiles[], PakNode *srcTile, int width, int height) const
 {
-	if(srcTile->type()!="TILE")
+	if(srcTile->type() != "TILE")
 		throw std::logic_error(TILECONV_ERROR_UNSUPPORTED_TYPE);
 
-	int seasons=1, phasen;
+	int seasons = 1, phasen;
 
 	// 旧ノードから必要な値を取得する。
-	PakTile *header = &srcTile->data_p()->tile;
-	switch(GetPakNodeVer(header->ver1_2.version))
+	PakTile *header = &srcTile->dataP()->tile;
+	switch(getPakNodeVer(header->ver1_2.version))
 	{
 	case 2:
 		seasons = header->ver2.seasons;
@@ -312,11 +313,11 @@ void TileConverter::convertTile(int layout, int x, int y,
 	{
 		// 新しいノードにdataをそのままコピーして、
 		*tiles[i]->data() = *srcTile->data();
-		PakTile *header = &tiles[i]->data_p()->tile;
+		PakTile *header = &tiles[i]->dataP()->tile;
 
 		// indexだけ変更する。
-		int newIndex = (x*2+(i&1)) + ((y*2+i/2)+layout*height)*width;
-		switch(GetPakNodeVer(header->ver1_2.version))
+		int newIndex = (x * 2 + (i & 1)) + ((y * 2 + i / 2) + layout * height) * width;
+		switch(getPakNodeVer(header->ver1_2.version))
 		{
 		case 0:
 			header->ver0.index = newIndex;
@@ -329,10 +330,10 @@ void TileConverter::convertTile(int layout, int x, int y,
 
 	// シーズン数×(Front/Back用=2)だけIMG2が存在する
 	PakNode::iterator it = srcTile->begin();
-	for(int i = 0; i<seasons*2; i++)
+	for(int i = 0; i < seasons * 2; i++)
 	{
 		PakNode *newImg2Nodes[4];
-		for(int j=0; j<4; j++)
+		for(int j = 0; j < 4; j++)
 			tiles[j]->appendChild(newImg2Nodes[j] = new PakNode("IMG2"));
 
 		// IMG2を変換
@@ -344,7 +345,7 @@ void TileConverter::convertTile(int layout, int x, int y,
 
 bool hasOpaquePixel(const Bitmap<PIXVAL> &bmp, int x, int y, int width, int height)
 {
-	for(int i = y; i<y+height; i++)
+	for(int i = y; i < y + height; i++)
 	{
 		Bitmap<PIXVAL>::const_iterator it = bmp.begin(i) + x;
 		Bitmap<PIXVAL>::const_iterator endIt = it + width;
@@ -357,9 +358,9 @@ bool hasOpaquePixel(const Bitmap<PIXVAL> &bmp, int x, int y, int width, int heig
 
 int getTileHeight(const Bitmap<PIXVAL> &bmp, int x, int y, int tileWidth, int tileHeight, int maxHeight)
 {
-	for(int i = maxHeight; i>0; i--)
+	for(int i = maxHeight; i > 0; i--)
 	{
-		if(hasOpaquePixel(bmp, x, y + tileHeight*(maxHeight-i), tileWidth, tileHeight))
+		if(hasOpaquePixel(bmp, x, y + tileHeight * (maxHeight - i), tileWidth, tileHeight))
 			return i;
 	}
 	return 1;
@@ -367,7 +368,7 @@ int getTileHeight(const Bitmap<PIXVAL> &bmp, int x, int y, int tileWidth, int ti
 
 void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2, int phasen) const
 {
-	if(srcImg2->type()!="IMG2")
+	if(srcImg2->type() != "IMG2")
 		throw std::logic_error(TILECONV_ERROR_UNSUPPORTED_TYPE);
 
 	// タイルサイズとversionを取り出す。
@@ -379,7 +380,7 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 		PakNode *imgNode  = *(*it)->begin();
 		SimuImage img;
 		img.load(*imgNode->data());
-		if(0<img.width)
+		if(0 < img.width)
 		{
 			version = img.version;
 			hasImage = true;
@@ -390,7 +391,7 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 	{
 		// 画像が指定されていなかったり空白画像が指定されていた場合は、
 		// ノードをコピーするだけで終わり。
-		for(int i=0; i<4; i++)
+		for(int i=0; i < 4; i++)
 		{
 			*img2s[i]->data() = *srcImg2->data();
 			for(PakNode::iterator it = srcImg2->begin(); it != srcImg2->end(); it++)
@@ -401,22 +402,22 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 
 	std::vector<Bitmap<PIXVAL>*> bitmaps;
 	// 画像データをビットマップに展開する。
-	for(int i = 0; i<phasen; i++)
+	for(int i = 0; i < phasen; i++)
 	{
-		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(m_ic->oldTileSize()*2, m_ic->oldTileSize() * (oldHeight+1));
+		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(m_ic->oldTileSize() * 2, m_ic->oldTileSize() * (oldHeight + 1));
 		bitmaps.push_back(bmp);
 		bmp->clear(SIMU_TRANSPARENT);
 
-		for(int j = 0; j<oldHeight; j++)
+		for(int j = 0; j < oldHeight; j++)
 		{
 			PakNode *img1Node = (*srcImg2)[j];
-			PakNode *imgNode = (*img1Node)[std::min(i, (int)img1Node->length()-1)];
+			PakNode *imgNode = (*img1Node)[std::min(i, (int)img1Node->length() - 1)];
 			SimuImage img;
 			img.load(*imgNode->data());
 
 			int imgx, imgy, imgw, imgh;
 			img.getBounds(imgx, imgy, imgw, imgh);
-			img.drawTo(imgx, imgy + (oldHeight-j)*m_ic->oldTileSize(), *bmp);
+			img.drawTo(imgx, imgy + (oldHeight - j) * m_ic->oldTileSize(), *bmp);
 		}
 	}
 
@@ -443,13 +444,13 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 	　│　　□□□□　　│
 	　└────────┘
 	*/
-	const int E=m_ic->oldTileSize()/8;
-	const int by=oldHeight*m_ic->oldTileSize();
+	const int E = m_ic->oldTileSize() / 8;
+	const int by = oldHeight*m_ic->oldTileSize();
 
-	encodeImg2(img2s[0], bitmaps, 2*E, by + 2*E,           1, 4*E, 3*E, version);
-	encodeImg2(img2s[3], bitmaps, 2*E, by + 4*E,           1, 4*E, 4*E, version);
-	encodeImg2(img2s[1], bitmaps, 4*E,      7*E, oldHeight*2, 4*E, 4*E, version);
-	encodeImg2(img2s[2], bitmaps, 0  ,      7*E, oldHeight*2, 4*E, 4*E, version);
+	encodeImg2(img2s[0], bitmaps, 2 * E, by + 2 * E,             1, 4 * E, 3 * E, version);
+	encodeImg2(img2s[3], bitmaps, 2 * E, by + 4 * E,             1, 4 * E, 4 * E, version);
+	encodeImg2(img2s[1], bitmaps, 4 * E,      7 * E, oldHeight * 2, 4 * E, 4 * E, version);
+	encodeImg2(img2s[2], bitmaps, 0    ,      7 * E, oldHeight * 2, 4 * E, 4 * E, version);
 
 	for(std::vector<Bitmap<PIXVAL>*>::iterator it = bitmaps.begin(); it != bitmaps.end(); it++)
 		delete *it;
@@ -460,35 +461,35 @@ void TileConverter::encodeImg2(PakNode *img2, std::vector<Bitmap<PIXVAL>*> &bitm
 {
 	// 新しい高さの決定
 	int newHeight = 1;
-	for(unsigned int i = 0; i<bitmaps.size(); i++)
+	for(unsigned int i = 0; i < bitmaps.size(); i++)
 		newHeight = std::max(newHeight, getTileHeight(*bitmaps[i], bx, by, width, height, maxHeight));
 
 	// 決定した新しい高さに基づいて、IMG2ノードヘッダの書き換え。 IMG1ノードを追加
 	img2->data()->resize(4);
-	unsigned short *img2Header = &img2->data_p()->img2;
+	unsigned short *img2Header = &img2->dataP()->img2;
 	img2Header[0] = newHeight;
 	img2Header[1] = 0;
 
-	for(int ih = 0; ih<newHeight; ih++)
+	for(int ih = 0; ih < newHeight; ih++)
 	{
 		PakNode *img1Node = new PakNode("IMG1");
 		img2->appendChild(img1Node);
 		img1Node->data()->resize(4);
-		unsigned short *img1Header = &img1Node->data_p()->img1;
+		unsigned short *img1Header = &img1Node->dataP()->img1;
 		img1Header[0] = bitmaps.size();
 		img1Header[1] = 0;
 
-		for(unsigned int ip=0; ip<bitmaps.size(); ip++)
+		for(unsigned int ip = 0; ip < bitmaps.size(); ip++)
 		{
 			PakNode *imgNode = new PakNode("IMG");
 			img1Node->appendChild(imgNode);
 			
-			Bitmap<PIXVAL> bmp(*bitmaps[ip], bx, by + (maxHeight-ih-1)*height, width, height);
+			Bitmap<PIXVAL> bmp(*bitmaps[ip], bx, by + (maxHeight - ih - 1)*height, width, height);
 
 			// エンコード
 			SimuImage image;
 			image.version = version;
-			image.zoomable= true;
+			image.zoomable = true;
 			image.encodeFrom(bmp, 0, 0, false);
 			image.save(*imgNode->data());
 

@@ -54,39 +54,39 @@ void calcBitmapMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom, int &lef
 	bottom = h;
 	left = w;
 	right = w;
-	for(int y = h-1; y>=0; y--)
-		for(int x = w-1; x>=0; x--)
+	for(int y = h - 1; y >= 0; y--)
+		for(int x = w - 1; x >= 0; x--)
 		{
-			if(bmp.pixel(x, y)!= SIMU_TRANSPARENT)
+			if(bmp.pixel(x, y) != SIMU_TRANSPARENT)
 			{
 				top    = std::min(top, y);
-				bottom = std::min(bottom, h-y-1);
+				bottom = std::min(bottom, h - y - 1);
 				left   = std::min(left, x);
-				right  = std::min(right, w-x-1);
+				right  = std::min(right, w - x - 1);
 			}
 		}
 
-	if(bottom==h)
+	if(bottom == h)
 	{
-		top  = 0;
+		top = 0;
 		left = 0;
 	}
 }
 
 void calcImageColMargin(int height, std::vector<PIXVAL>::const_iterator it, int &left, int &right)
 {
-	if(height==0)
+	if(height == 0)
 	{
 		left = 0;
-		right=0;
+		right = 0;
 		return;
 	}
 
 	int minLeft = 0x100;
-	int width   = 0;
+	int width = 0;
 	int canvasWidth = 0;
 
-	for(int y = 0; y<height; ++y)
+	for(int y = 0; y < height; ++y)
 	{
 		int runlen = *it++;
 		int x = 0;
@@ -100,12 +100,12 @@ void calcImageColMargin(int height, std::vector<PIXVAL>::const_iterator it, int 
 			if (runlen) width = std::max(width, x);
 
 			runlen = *it++;
-		}while(runlen>0);
+		}while(runlen > 0);
 		canvasWidth = std::max(canvasWidth, x);
 	}
 	
 	left = minLeft;
-	right = canvasWidth-width;
+	right = canvasWidth - width;
 }
 
 std::string SimuImage::getInfo(const std::vector<char> &buffer)
@@ -138,7 +138,7 @@ void SimuImage::load(const std::vector<char> &buffer)
 	int headerSize, dataLen;
 	headerSize = loadHeader(buffer, dataLen);
 	data.resize(dataLen);
-	if(dataLen>0)
+	if(dataLen > 0)
 		memcpy(&data[0], pointer_cast<const char*>(&buffer[0]) + headerSize, dataLen*sizeof(PIXVAL));
 }
 
@@ -177,7 +177,7 @@ int SimuImage::loadHeader(const std::vector<char> &buffer, int &len)
 		this->width    = header->ver3.w;
 		this->height   = header->ver3.h;
 		this->zoomable = header->ver3.zoomable != 0;
-		len            = (buffer.size() - headerSize)/sizeof(PIXVAL);
+		len            = (buffer.size() - headerSize)/ sizeof(PIXVAL);
 		break;
 	default:
 		throw std::runtime_error("対応していない画像形式です。");
@@ -191,13 +191,13 @@ void SimuImage::save(std::vector<char> &buffer)
 	if(x<0 || y < 0)
 	{
 		// ver0ヘッダではオフセットに負数を使えないっぽい。
-	   if(version==0)
+	   if(version == 0)
 		{
 			int offsetX, offsetY, width, height;
 			getBounds(offsetX, offsetY, width, height);
 			MemoryBitmap<PIXVAL> bmp(width, height);
 			bmp.clear(SIMU_TRANSPARENT);
-			drawTo(0,0, bmp);
+			drawTo(0, 0, bmp);
 			version = 1;
 			encodeFrom(bmp, offsetX, offsetY, true);
 		}
@@ -236,15 +236,15 @@ void SimuImage::save(std::vector<char> &buffer)
 		header->ver3.w   = static_cast<unsigned short>(this->width);
 		header->ver3.h   = static_cast<unsigned short>(this->height);
 		header->ver3.zoomable = this->zoomable ? 1 : 0;
-		header->ver3.version  =3;
+		header->ver3.version  = 3;
 	}
 	if(data.size()>0)
-		memcpy(pointer_cast<char*>(header) + headerSize, &data[0], data.size()*sizeof(PIXVAL));
+		memcpy(pointer_cast<char*>(header) + headerSize, &data[0], data.size() * sizeof(PIXVAL));
 }
 
 void SimuImage::getBounds(int &offsetX, int &offsetY, int &width, int &height) const
 {
-	if(this->version<=1)
+	if(this->version <= 1)
 	{
 		int pl, pr;
 		calcImageColMargin(this->height, this->data.begin(), pl, pr);
@@ -264,7 +264,7 @@ void SimuImage::getBounds(int &offsetX, int &offsetY, int &width, int &height) c
 
 void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 {
-	if(bx<0 || by<0 || bmp.width() < bx + this->width || bmp.height() < by + this->height)
+	if(bx < 0 || by < 0 || bmp.width() < bx + this->width || bmp.height() < by + this->height)
 		throw std::runtime_error("画像境界エラー");
 
 
@@ -272,7 +272,7 @@ void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 
 	for(int iy = 0; iy< this->height; iy++)
 	{
-		Bitmap<PIXVAL>::iterator bp = bmp.begin(by+iy) + bx;
+		Bitmap<PIXVAL>::iterator bp = bmp.begin(by + iy) + bx;
 		int runlen = *it++;
 		do{
 			bp += runlen;
@@ -281,7 +281,7 @@ void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 			{
 				PIXVAL val = *it++;
 				// IMG v0ではプレイヤーカラーの値が一つずれるらしい
-				if(this->version==0 && 0x8000u<= val && val <= 0x800Fu) val++;
+				if(this->version == 0 && 0x8000u <= val && val <= 0x800Fu) val++;
 				*bp++ = val;
 			}
 			runlen = *it++;
@@ -289,8 +289,7 @@ void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 	}
 }
 
-void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
-									bool canEmpty)
+void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY, bool canEmpty)
 {
 	// 上下の余白を計算する。
 	int pt, pb, pl, pr;
@@ -299,29 +298,30 @@ void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 	Bitmap<PIXVAL> subBitmap(bmp,
 		this->version>=2 ? pl : 0,
 		pt,
-		this->version>=2 ?  bmp.width()-pl-pr : bmp.width(),
-		bmp.height()-pt-pb);
+		this->version>=2 ?  bmp.width() - pl - pr : bmp.width(),
+		bmp.height() - pt - pb);
 
-	if(subBitmap.height()>0)
+	if(subBitmap.height() > 0)
 	{
 		data.resize(0);
-		for(int iy=0; iy<subBitmap.height(); iy++)
+		for(int iy = 0; iy < subBitmap.height(); iy++)
 		{
-			Bitmap<PIXVAL>::const_iterator end= subBitmap.end(iy);
-			Bitmap<PIXVAL>::const_iterator it= subBitmap.begin(iy);
+			Bitmap<PIXVAL>::const_iterator end = subBitmap.end(iy);
+			Bitmap<PIXVAL>::const_iterator it = subBitmap.begin(iy);
 
 			do{
 				int transparentLen = 0;
 				while(it != end && *it == SIMU_TRANSPARENT)
 				{
-					it++; transparentLen++;
+					it++;
+					transparentLen++;
 				}
 
 				// rev.3088
 				// IMG v2以降では右の余白を飛ばす。それ以前のバージョンでは余白を含める。
-				if(this->version>=2)
+				if(this->version >= 2)
 				{
-					if(it==end && transparentLen < subBitmap.width()) break;
+					if(it == end && transparentLen < subBitmap.width()) break;
 				}
 				data.push_back(transparentLen);
 				
@@ -331,11 +331,11 @@ void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 				{
 					PIXVAL val = *it++;
 					// IMG v0ではプレイヤーカラーの値が一つずれるらしい
-					if(this->version==0 && 0x8000u< val && val <= 0x800Fu) val--;
+					if(this->version == 0 && 0x8000u < val && val <= 0x800Fu) val--;
 					data.push_back(val);
 				}
 				data[opaqueLenIndex] = data.size() - opaqueLenIndex - 1;
-			}while(it!=end);
+			}while(it != end);
 			data.push_back(0);
 		}
 
@@ -348,10 +348,10 @@ void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 		if(canEmpty)
 		{
 			data.resize(0);
-			this->x     = offsetX + 1;
-			this->y     = offsetY + 1;
-			this->width = 0;
-			this->height= 0;
+			this->x      = offsetX + 1;
+			this->y      = offsetY + 1;
+			this->width  = 0;
+			this->height = 0;
 		}else{
 			// サイズ0のビットマップでは困る場合は、灰色のピクセルを一個置いて改めてエンコード。
 			MemoryBitmap<PIXVAL> onePixelBitmap(bmp.width(), 1);

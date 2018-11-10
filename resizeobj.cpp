@@ -24,23 +24,6 @@ enum ConvertMode{
 
 class ResizeObj
 {
-public:
-	ResizeObj()
-	{
-		m_tc.imgConverter(&m_ic);
-	};
-
-	void convertStdIO() const;
-	void convertFile(std::string filename) const;
-
-	void antialias(int val){ m_ic.alpha(val); };
-	void addonPrefix(std::string val){ m_addonPrefix = val; };
-	void newExtension(std::string val){ m_newExt = val; };
-	void headerRewriting(bool val){ m_headerRewriting = val;};
-	void set_convertMode(ConvertMode val){ m_convertMode = val; };
-	void specialColorMode(SCConvMode val){ m_ic.specialColorMode(val); };
-	void tileNoAnimation(bool val){ m_tc.noAnimation(val); };
-	void newTileSize(int val){ m_ic.newTileSize(val); };
 private:
 	ImgConverter m_ic;
 	ImgUpscaleConverter m_iuc;
@@ -53,6 +36,23 @@ private:
 
 	void convertPak(PakFile &pak) const;
 	void convertAddon(PakNode *addon) const;
+public:
+	ResizeObj()
+	{
+		m_tc.imgConverter(&m_ic);
+	};
+
+	void convertStdIO() const;
+	void convertFile(std::string filename) const;
+
+	void setAntialias(int val){ m_ic.setAlpha(val); };
+	void setAddonPrefix(std::string val){ m_addonPrefix = val; };
+	void setNewExtension(std::string val){ m_newExt = val; };
+	void setHeaderRewriting(bool val){ m_headerRewriting = val;};
+	void setConvertMode(ConvertMode val){ m_convertMode = val; };
+	void setSpecialColorMode(SCConvMode val){ m_ic.setSpecialColorMode(val); };
+	void setTileNoAnimation(bool val){ m_tc.setNoAnimation(val); };
+	void setNewTileSize(int val){ m_ic.setNewTileSize(val); };
 };
 
 /// アドオン名変更処理の対象外とする形式一覧.
@@ -64,9 +64,9 @@ const char *renameNodeExceptions[] = {
 
 bool isRenameNode(const char *name)
 {
-	for(int i = 0; i<lengthof(renameNodeExceptions); i++)
+	for(int i = 0; i < lengthof(renameNodeExceptions); i++)
 	{
-		if(strncmp(renameNodeExceptions[i], name, NODE_NAME_LENGTH)==0)
+		if(strncmp(renameNodeExceptions[i], name, NODE_NAME_LENGTH) == 0)
 			return false;
 	}
 	return true;
@@ -86,13 +86,13 @@ void renameobj(PakNode *node, std::string prefix)
 		return;
 
 	// XREFノードの場合は変換する
-	if(node->type()=="XREF")
+	if(node->type() == "XREF")
 	{
-		PakXRef *x = &node->data_p()->xref;
+		PakXRef *x = &node->dataP()->xref;
 
 		if(isRenameNode(&x->type[0]))
 		{
-			if(node->data()->size()>sizeof(PakXRef))
+			if(node->data()->size() > sizeof(PakXRef))
 			{
 				std::vector<char> *dat = node->data();
 				dat->insert(dat->begin() + offsetof(PakXRef, name),
@@ -102,7 +102,7 @@ void renameobj(PakNode *node, std::string prefix)
 	}	
 	
 	// 最初の子ノードがTEXTの場合はそれをアドオン名とみなして変換する。
-	if(node->begin() != node->end() && (*node->begin())->type()=="TEXT")
+	if(node->begin() != node->end() && (*node->begin())->type() == "TEXT")
 	{
 		std::vector<char> *dat = (*node->begin())->data();
 		dat->insert(dat->begin(), prefix.begin(), prefix.end()); 
@@ -114,9 +114,9 @@ void renameobj(PakNode *node, std::string prefix)
 
 std::string addonName(PakNode *node)
 {
-	if(node->type()=="TEXT")
-		return node->data_p()->text;
-	else if(node->length()>0)
+	if(node->type() == "TEXT")
+		return node->dataP()->text;
+	else if(node->length() > 0)
 		return addonName((*node)[0]);
 	else	
 		return "";
@@ -164,7 +164,7 @@ void ResizeObj::convertAddon(PakNode *addon) const
 void ResizeObj::convertPak(PakFile &pak) const
 {
 	if(m_headerRewriting)
-		pak.signature(pak.signature() + my_signature);
+		pak.setSignature(pak.signature() + my_signature);
 
 	PakNode &root = pak.root();
 	for(PakNode::iterator it = root.begin(); it != root.end(); it++)
@@ -190,7 +190,7 @@ void ResizeObj::convertFile(std::string filename) const
 	PakFile pak;
 	pak.loadFromFile(filename);
 
-	if (pak.signature().find(my_signature)!=std::string::npos)
+	if (pak.signature().find(my_signature) != std::string::npos)
 	{
 		std::clog << "    skipped." << std::endl;
 		return;
@@ -209,7 +209,7 @@ void printOption()
 #ifdef _DEBUG
 	"DEBUG "
 #endif
-	"resizeobj ver 1.3.0 beta by wa\n\n"
+	"resizeobj ver 1.5.0 beta by wa\n\n"
 	"resizeobj [オプション...] 対象ファイルマスク...\n"
 	"オプション:\n\n"
 	" -A=(0...100) 画像縮小時のアンチエイリアス量\n"
@@ -221,8 +221,8 @@ void printOption()
 	"                2: 縮小元エリアで特殊色が半数以上使用されている場合はそれを出力\n"
 	" -W=(16...255) 画像変換後のタイルサイズを指定する。既定値は「64」"
 	"\n"
-	" -K           原寸モード\n"
-	" -KA          原寸モードで建築物を変換する際にアニメーションを取り除く\n"
+	" -K           原寸大モード\n"
+	" -KA          原寸大モードで建築物を変換する際にアニメーションを取り除く\n"
 	"\n"
 	" -X           拡大モード\n"
 	"\n"
@@ -238,7 +238,7 @@ void printOption()
 template<class T> T optToEnum(const std::string &text, int high, const char *opt)
 {
 	int value = atoi(text.c_str());
-	if (value<0 || high<value)
+	if (value < 0 || high < value)
 	{
 		std::ostringstream os;
 		os << opt << "オプションの有効範囲は0～" << high << "です。: " << text;
@@ -260,40 +260,40 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::locale::global(std::locale(""));
 
 		ResizeObj ro;
-		ro.antialias(100);
-		ro.headerRewriting(true);
-		ro.specialColorMode(scmTOPLEFT);
-		ro.addonPrefix("");
-		ro.set_convertMode(cmDownscale);
-		ro.newExtension(".64.pak");
-		ro.tileNoAnimation(false);
+		ro.setAntialias(100);
+		ro.setHeaderRewriting(true);
+		ro.setSpecialColorMode(scmTOPLEFT);
+		ro.setAddonPrefix("");
+		ro.setConvertMode(cmDownscale);
+		ro.setNewExtension(".64.pak");
+		ro.setTileNoAnimation(false);
 
 		std::vector<std::string> files;
-		for(int i=1; i<argc; i++)
+		for(int i = 1; i < argc; i++)
 		{
 			std::string key, val;
 			parseArg(argv[i], key, val);
-			if(key==""){
-				if (val.find_first_of("*?")==std::string::npos)
+			if(key == ""){
+				if (val.find_first_of("*?") == std::string::npos)
 					files.push_back(val);
 				else
 					fileList(files, val);
 			}
-			else if(key=="K"){ ro.set_convertMode(cmSplit); }
-			else if(key=="X"){ ro.set_convertMode(cmUpscale); ro.newExtension(".128.pak");}
-			else if(key=="KA"){ ro.tileNoAnimation(true); }
-			else if(key=="A"){ ro.antialias(optToEnum<int>(val, 100, "A"));}
-			else if(key=="S"){ ro.specialColorMode(optToEnum<SCConvMode>(val, 2, "S")); }
-			else if(key=="W"){
+			else if(key == "K"){ ro.setConvertMode(cmSplit); }
+			else if(key == "X"){ ro.setConvertMode(cmUpscale); ro.setNewExtension(".128.pak");}
+			else if(key == "KA"){ ro.setTileNoAnimation(true); }
+			else if(key == "A"){ ro.setAntialias(optToEnum<int>(val, 100, "A"));}
+			else if(key == "S"){ ro.setSpecialColorMode(optToEnum<SCConvMode>(val, 2, "S")); }
+			else if(key == "W"){
 				int ts = optToEnum<int>(val, 255, "W");
-				if(ts%8 != 0) throw std::runtime_error("タイルサイズは8の倍数に限ります。"); 
-				ro.newTileSize(ts);
+				if(ts % 8 != 0) throw std::runtime_error("タイルサイズは8の倍数に限ります。"); 
+				ro.setNewTileSize(ts);
 			}
-			else if(key=="N"){ ro.headerRewriting(false);    }
-			else if(key=="T"){ ro.addonPrefix(val);        }
-			else if(key=="E"){ if(val!="") ro.newExtension(val); }
-			else if(key=="D"){ isShowErrorDialog = false; }
-			else if(key=="H" || key=="?")
+			else if(key == "N"){ ro.setHeaderRewriting(false); }
+			else if(key == "T"){ ro.setAddonPrefix(val); }
+			else if(key == "E"){ if(val != "") ro.setNewExtension(val); }
+			else if(key == "D"){ isShowErrorDialog = false; }
+			else if(key == "H" || key == "?")
 			{
 				printOption();
 				return 0;

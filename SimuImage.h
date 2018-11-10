@@ -25,6 +25,9 @@ inline PIXVAL toRGB(PIXVAL col)
 
 class SimuImage
 {
+private:
+	std::string info(int dataLen) const;
+	int loadHeader(const std::vector<char> &buffer, int &len);
 public:
 	int version;
 	int x, y, width, height;
@@ -44,9 +47,6 @@ public:
 	/// ビットマップから画像データを作る。
 	void encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 		bool canEmpty);
-private:
-	std::string info(int dataLen) const;
-	int loadHeader(const std::vector<char> &buffer, int &len);
 };
 
 /// ビトマップの上下左右の余白を計算する。
