@@ -1,6 +1,7 @@
 Debug/
 Release/
 ipch/
+.vs/
 *.VC.db
 *.VC.VC.opendb
 *.user
