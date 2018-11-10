@@ -9,10 +9,18 @@
 #include "utils.h"
 #include "paknode.h"
 #include "ImgConverter.h"
+#include "ImgUpscaleConverter.h"
 #include "VhclConverter.h"
 #include "TileConverter.h"
 
 const char *my_signature = "/resizeobj";
+
+enum ConvertMode{
+	cmNoConvert,
+	cmDownscale,
+	cmUpscale,
+	cmSplit,
+};
 
 class ResizeObj
 {
@@ -29,17 +37,18 @@ public:
 	void addonPrefix(std::string val){ m_addonPrefix = val; };
 	void newExtension(std::string val){ m_newExt = val; };
 	void headerRewriting(bool val){ m_headerRewriting = val;};
-	void keepImageSize(bool val){ m_keepImageSize = val; };
+	void set_convertMode(ConvertMode val){ m_convertMode = val; };
 	void specialColorMode(SCConvMode val){ m_ic.specialColorMode(val); };
 	void tileNoAnimation(bool val){ m_tc.noAnimation(val); };
 	void newTileSize(int val){ m_ic.newTileSize(val); };
 private:
 	ImgConverter m_ic;
+	ImgUpscaleConverter m_iuc;
 	VhclConverter m_vc;
 	TileConverter m_tc;
 	std::string m_addonPrefix;
 	bool m_headerRewriting;
-	bool m_keepImageSize;
+	ConvertMode m_convertMode;
 	std::string m_newExt;
 
 	void convertPak(PakFile &pak) const;
@@ -119,8 +128,9 @@ void ResizeObj::convertAddon(PakNode *addon) const
 {
 	std::clog << "    " << addonName(addon) << std::endl;
 
-	if(m_keepImageSize)
+	switch(m_convertMode)
 	{
+	 case cmSplit:
 		if(addon->type() == "VHCL")
 		{
 			m_vc.convertVhclAddon(addon, m_ic.newTileSize());
@@ -134,8 +144,15 @@ void ResizeObj::convertAddon(PakNode *addon) const
 		{
 			m_tc.convertAddon(addon);
 		}
-	}else{
+		break;
+		
+	 case cmDownscale:
 		m_ic.convertAddon(addon);
+		break;
+
+	 case cmUpscale:
+		m_iuc.convertAddon(addon);
+		break;
 	}
 
 	if(m_addonPrefix.size())
@@ -192,7 +209,7 @@ void printOption()
 #ifdef _DEBUG
 	"DEBUG "
 #endif
-	"resizeobj ver 1.2.0 beta by wa\n\n"
+	"resizeobj ver 1.3.0 beta by wa\n\n"
 	"resizeobj [オプション...] 対象ファイルマスク...\n"
 	"オプション:\n\n"
 	" -A=(0...100) 画像縮小時のアンチエイリアス量\n"
@@ -206,6 +223,8 @@ void printOption()
 	"\n"
 	" -K           原寸モード\n"
 	" -KA          原寸モードで建築物を変換する際にアニメーションを取り除く\n"
+	"\n"
+	" -X           拡大モード\n"
 	"\n"
 	" -E=(ext)     出力するファイルの拡張子。既定値は「.64.pak」\n"
 	" -T=(text)    アドオン名の先頭に指定されたtextを追加する\n"
@@ -245,7 +264,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		ro.headerRewriting(true);
 		ro.specialColorMode(scmTOPLEFT);
 		ro.addonPrefix("");
-		ro.keepImageSize(false);
+		ro.set_convertMode(cmDownscale);
 		ro.newExtension(".64.pak");
 		ro.tileNoAnimation(false);
 
@@ -260,7 +279,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				else
 					fileList(files, val);
 			}
-			else if(key=="K"){ ro.keepImageSize(true); }
+			else if(key=="K"){ ro.set_convertMode(cmSplit); }
+			else if(key=="X"){ ro.set_convertMode(cmUpscale); ro.newExtension(".128.pak");}
 			else if(key=="KA"){ ro.tileNoAnimation(true); }
 			else if(key=="A"){ ro.antialias(optToEnum<int>(val, 100, "A"));}
 			else if(key=="S"){ ro.specialColorMode(optToEnum<SCConvMode>(val, 2, "S")); }
