@@ -37,7 +37,7 @@ inline PIXVAL_TYPE GetColorType(PIXVAL col)
 	{
 		return PVT_OPAQUE_COLOR;
 	}
-	else if (col == PVT_TRANSPARENT)
+	else if (col == SIMU_TRANSPARENT)
 	{
 		return PVT_TRANSPARENT;
 	}
