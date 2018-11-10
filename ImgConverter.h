@@ -39,8 +39,8 @@ private:
 	/// 右・下にTileSize/2以上余白がある場合はその余白を切り捨ててタイルサイズを半減する。
 	/// おもにアイコン画像用
 	bool cutImageMargin(SimuImage &image) const;
-	/// 産業施設の煙の位置を調整する……筈だった
-	void convertFactorySmoke(PakNode *node) const;
+	// 4ピクセルを混合した1ピクセルを計算する
+	PIXVAL mixOpaquePixels(PIXVAL cols[]) const;
 	/// 4ピクセルを混合した1ピクセルを計算する
-	PIXVAL mixPixel(PIXVAL cols[]) const;
+	PIXVAL mixPixels(PIXVAL cols[]) const;
 };

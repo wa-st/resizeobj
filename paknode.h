@@ -81,7 +81,7 @@ union PakBuilding
 		unsigned short y;
 		unsigned char layouts;
 		// ....
-	} ver1_6;
+	} ver1_9;
 
 };
 
@@ -141,7 +141,7 @@ protected:
 	virtual void loadData(std::istream &src, int size);
 	//virtual void writeData(std::ostream &dest) const;
 public:
-	PakNode(std::string type=""):m_type(type){};
+	PakNode(std::string type=""): m_type(type){};
 	virtual PakNode* clone();
 	virtual void clear();
 	void load(std::istream &src);
@@ -163,6 +163,7 @@ public:
 
 	PakNode *operator[](int index){ return m_items[index]; };
 	const PakNode *operator[](int index)const{ return m_items[index]; };
+	PakNode *at(int index){ return m_items[index]; };
 
 	iterator begin(){ return m_items.begin(); };
 	iterator end(){ return m_items.end(); };

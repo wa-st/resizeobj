@@ -66,7 +66,7 @@ void ImgUpscaleConverter::upscaleImage(SimuImage &data) const
 	
 	for(int iy = 0; iy < bmp64.height(); ++iy)
 	{
-		for(int ix = 0; ix <bmp64.width(); ++ix)
+		for(int ix = 0; ix < bmp64.width(); ++ix)
 		{
 			PIXVAL col = bmp64.pixel(ix, iy);
 			bmp128.pixel(ix * 2    , iy * 2    ) = col;

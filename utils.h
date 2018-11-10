@@ -35,12 +35,8 @@ inline T object_cast(U* o)
  */
 void parseArg(const char *arg, std::string &key, std::string &value);
 
-/** ファイル名拡張子の変更を行う.
- *
- *  @param path 変更元。変更されるのは最後の"."以降
- *  @param ext "."も含めて指定する。""を使用すれば拡張子の除去となる。
- */
-std::string changeFileExt(const std::string path, const std::string ext);
+/** ファイル名の拡張子を変える */
+std::string changeFileExtension(const std::string path, const std::string newExtension);
 
 /** ディレクトリ直下のファイル一覧を作成する. */
 void fileList(std::vector<std::string> &entries, const std::string mask);

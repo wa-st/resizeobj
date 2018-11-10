@@ -13,7 +13,7 @@
 #include "VhclConverter.h"
 #include "TileConverter.h"
 
-const char *my_signature = "/resizeobj";
+const char *RESIZEOBJ_SIGNATURE = "/resizeobj";
 
 enum ConvertMode{
 	cmNoConvert,
@@ -37,11 +37,7 @@ private:
 	void convertPak(PakFile &pak) const;
 	void convertAddon(PakNode *addon) const;
 public:
-	ResizeObj()
-	{
-		m_tc.imgConverter(&m_ic);
-	};
-
+	ResizeObj();
 	void convertStdIO() const;
 	void convertFile(std::string filename) const;
 
@@ -56,7 +52,7 @@ public:
 };
 
 /// アドオン名変更処理の対象外とする形式一覧.
-const char *renameNodeExceptions[] = {
+const char *RENAME_NODE_EXCEPTIONS[] = {
 	"GOOD",
 //	"SMOK",
 };
@@ -64,9 +60,9 @@ const char *renameNodeExceptions[] = {
 
 bool isRenameNode(const char *name)
 {
-	for(int i = 0; i < lengthof(renameNodeExceptions); i++)
+	for(int i = 0; i < lengthof(RENAME_NODE_EXCEPTIONS); i++)
 	{
-		if(strncmp(renameNodeExceptions[i], name, NODE_NAME_LENGTH) == 0)
+		if(strncmp(RENAME_NODE_EXCEPTIONS[i], name, NODE_NAME_LENGTH) == 0)
 			return false;
 	}
 	return true;
@@ -80,7 +76,7 @@ bool isRenameNode(const char *name)
 pak64:  Buecher
 pak128: Bucher
 */
-void renameobj(PakNode *node, std::string prefix)
+void renameObj(PakNode *node, std::string prefix)
 {
 	if(!isRenameNode(node->type().data()))
 		return;
@@ -108,29 +104,32 @@ void renameobj(PakNode *node, std::string prefix)
 		dat->insert(dat->begin(), prefix.begin(), prefix.end()); 
 	}
 
-	for(PakNode::iterator it = node->begin(); it != node->end(); it++) renameobj(*it, prefix);
+	for(PakNode::iterator it = node->begin(); it != node->end(); it++)
+		renameObj(*it, prefix);
 }
 
-
-std::string addonName(PakNode *node)
+std::string getAddonName(PakNode *node)
 {
 	if(node->type() == "TEXT")
 		return node->dataP()->text;
 	else if(node->length() > 0)
-		return addonName((*node)[0]);
+		return getAddonName(node->at(0));
 	else	
 		return "";
 }
 
-
+ResizeObj::ResizeObj()
+{
+    m_tc.imgConverter(&m_ic);
+}
 
 void ResizeObj::convertAddon(PakNode *addon) const
 {
-	std::clog << "    " << addonName(addon) << std::endl;
+	std::clog << "    " << getAddonName(addon) << std::endl;
 
 	switch(m_convertMode)
 	{
-	 case cmSplit:
+	  case cmSplit:
 		if(addon->type() == "VHCL")
 		{
 			m_vc.convertVhclAddon(addon, m_ic.newTileSize());
@@ -146,25 +145,25 @@ void ResizeObj::convertAddon(PakNode *addon) const
 		}
 		break;
 		
-	 case cmDownscale:
+	  case cmDownscale:
 		m_ic.convertAddon(addon);
 		break;
 
-	 case cmUpscale:
+	  case cmUpscale:
 		m_iuc.convertAddon(addon);
 		break;
 	}
 
 	if(m_addonPrefix.size())
 	{
-		renameobj(addon, m_addonPrefix);
+		renameObj(addon, m_addonPrefix);
 	}
 }
 
 void ResizeObj::convertPak(PakFile &pak) const
 {
 	if(m_headerRewriting)
-		pak.setSignature(pak.signature() + my_signature);
+		pak.setSignature(pak.signature() + RESIZEOBJ_SIGNATURE);
 
 	PakNode &root = pak.root();
 	for(PakNode::iterator it = root.begin(); it != root.end(); it++)
@@ -190,7 +189,7 @@ void ResizeObj::convertFile(std::string filename) const
 	PakFile pak;
 	pak.loadFromFile(filename);
 
-	if (pak.signature().find(my_signature) != std::string::npos)
+	if (pak.signature().find(RESIZEOBJ_SIGNATURE) != std::string::npos)
 	{
 		std::clog << "    skipped." << std::endl;
 		return;
@@ -198,7 +197,7 @@ void ResizeObj::convertFile(std::string filename) const
 
 	convertPak(pak);
 
-	if(m_newExt != "") filename = changeFileExt(filename, m_newExt);
+	if(m_newExt != "") filename = changeFileExtension(filename, m_newExt);
 
 	pak.saveToFile(filename);
 }
@@ -257,7 +256,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		std::locale::global(std::locale(""));
+		//std::locale::global(std::locale(""));
 
 		ResizeObj ro;
 		ro.setAntialias(100);
@@ -273,32 +272,63 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			std::string key, val;
 			parseArg(argv[i], key, val);
-			if(key == ""){
+			if(key == "")
+			{
 				if (val.find_first_of("*?") == std::string::npos)
 					files.push_back(val);
 				else
 					fileList(files, val);
 			}
-			else if(key == "K"){ ro.setConvertMode(cmSplit); }
-			else if(key == "X"){ ro.setConvertMode(cmUpscale); ro.setNewExtension(".128.pak");}
-			else if(key == "KA"){ ro.setTileNoAnimation(true); }
-			else if(key == "A"){ ro.setAntialias(optToEnum<int>(val, 100, "A"));}
-			else if(key == "S"){ ro.setSpecialColorMode(optToEnum<SCConvMode>(val, 2, "S")); }
-			else if(key == "W"){
-				int ts = optToEnum<int>(val, 255, "W");
+			else if(key == "K")
+			{
+				ro.setConvertMode(cmSplit);
+			}
+			else if(key == "X")
+			{
+				ro.setConvertMode(cmUpscale);
+				ro.setNewExtension(".128.pak");
+			}
+			else if(key == "KA")
+			{
+				ro.setTileNoAnimation(true);
+			}
+			else if(key == "A")
+			{
+				ro.setAntialias(optToEnum<int>(val, 100, "A"));
+			}
+			else if(key == "S")
+			{
+				ro.setSpecialColorMode(optToEnum<SCConvMode>(val, 2, "S"));
+			}
+			else if(key == "W")
+			{
+				int ts = optToEnum<int>(val, 0xFFFF, "W");
 				if(ts % 8 != 0) throw std::runtime_error("タイルサイズは8の倍数に限ります。"); 
 				ro.setNewTileSize(ts);
 			}
-			else if(key == "N"){ ro.setHeaderRewriting(false); }
-			else if(key == "T"){ ro.setAddonPrefix(val); }
-			else if(key == "E"){ if(val != "") ro.setNewExtension(val); }
-			else if(key == "D"){ isShowErrorDialog = false; }
+			else if(key == "N")
+			{
+				ro.setHeaderRewriting(false);
+			}
+			else if(key == "T")
+			{
+				ro.setAddonPrefix(val);
+			}
+			else if(key == "E")
+			{
+				if(val != "") ro.setNewExtension(val);
+			}
+			else if(key == "D")
+			{
+				isShowErrorDialog = false;
+			}
 			else if(key == "H" || key == "?")
 			{
 				printOption();
 				return 0;
 			}
-			else{
+			else
+			{
 				std::clog << "無効なオプションです : " << key << std::endl;
 				printOption();
 				return 1;
@@ -318,7 +348,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				ro.convertFile(*it);
 		}
 
-	}catch(const std::exception &e)
+	}
+	catch(const std::exception &e)
 	{
 		std::cerr << "Error : " << e.what() << std::endl;
 		if(isShowErrorDialog)

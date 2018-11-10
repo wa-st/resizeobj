@@ -30,7 +30,14 @@ public:
 	{
 		VALIDATE_BOUNDS(&base, x + width, y + height);
 
-		m_ptr = pointer_cast<char*>(&base.pixel(x,y));
+		if (m_width > 0 && m_height > 0)
+		{
+			m_ptr = pointer_cast<char*>(&base.pixel(x, y));
+		}
+		else
+		{
+			m_ptr = 0;
+		}
 	}
 
 	virtual ~Bitmap(){};

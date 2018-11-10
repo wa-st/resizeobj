@@ -4,30 +4,18 @@
 
 bool ImgConverter::convertNodeTree(PakNode *node) const
 {
+	bool result = false;
+
 	if(node->type() == "IMG")
 	{
 		convertImage(node);
-		return true;
+		result = true;
 	}
-	else if(node->type() == "FSMO")
-	{
-		convertFactorySmoke(node);
-		return true;
-	}
-	else
-	{
-		bool result = false;
-		for(PakNode::iterator it = node->begin(); it != node->end(); it++)
-			result = convertNodeTree(*it) || result;
-		return result;
-	}
-}
 
-void ImgConverter::convertFactorySmoke(PakNode *node) const
-{
-	//PakFactorySmoke* pfs = &node->data_p()->fsmo;
-	//pfs->offsetX /= 2;
-	//pfs->offsetY /= 2;
+	for(PakNode::iterator it = node->begin(); it != node->end(); it++)
+		result = convertNodeTree(*it) || result;
+
+	return result;
 }
 
 void ImgConverter::convertImage(PakNode *node) const
@@ -54,7 +42,7 @@ bool ImgConverter::cutImageMargin(SimuImage &image) const
 	if(image.version >= 2) return false;
 
 	int l, r;
-	calcImageColMargin(image.height, image.data.begin(), l, r);
+	getImageColumnMargin(image.height, image.data.begin(), l, r);
 
 	// 下側・右側にtileSize/2以上の余白があれば……
 	if(image.height <= newTileSize() && r >= newTileSize())
@@ -103,7 +91,7 @@ void ImgConverter::shrinkImage(SimuImage &data) const
 			cols[2] = bmp128.pixel(ix * 2    , iy * 2 + 1);
 			cols[3] = bmp128.pixel(ix * 2 + 1, iy * 2 + 1);
 
-			bmp64.pixel(ix, iy) = mixPixel(cols);
+			bmp64.pixel(ix, iy) = mixPixels(cols);
 		}
 	}
 
@@ -114,63 +102,89 @@ void ImgConverter::shrinkImage(SimuImage &data) const
 }
 
 
-PIXVAL calcSpecialColor(PIXVAL cols[])
+PIXVAL getModeSpecialColor(PIXVAL cols[])
 {
 	for(int i = 0; i < 3; i++)
 	{
 		PIXVAL c = cols[i];
-		if(c & SIMU_SPECIALMASK && c != SIMU_TRANSPARENT)
+		if(isSpecialColor(c))
 		{
-			for(int j= i + 1; j < 4; j++)
-				if(c == cols[j]) return c;
+			int index = getSpecialColorIndex(c);
+			for (int j = i + 1; j < 4; j++) {
+				if (isSpecialColor(cols[j]) && (index == getSpecialColorIndex(cols[j]))) {
+					return c;
+				}
+			}
 		}
 	}
 	return 0;
 }
 
-PIXVAL ImgConverter::mixPixel(PIXVAL cols[]) const
+PIXVAL ImgConverter::mixOpaquePixels(PIXVAL cols[]) const
 {
-	if(cols[0] == SIMU_TRANSPARENT || m_alpha == 0)
+	RGBA sum = { 0, 0, 0, 0 };
+	RGBA base;
+
+	unpackColorChannels(cols[0], base);
+
+	for (int i = 0; i < 4; i++)
+	{
+		RGBA channels;
+		unpackColorChannels(cols[i], channels);
+		//sum.red += channels.red * channels.alpha;
+		//sum.green += channels.green * channels.alpha;
+		//sum.blue += channels.blue * channels.alpha;
+		sum.red += (channels.red & 0xF8) * channels.alpha;
+		sum.green += (channels.green & 0xF8) * channels.alpha;
+		sum.blue += (channels.blue & 0xF8) * channels.alpha;
+		sum.alpha += channels.alpha;
+	}
+	if (sum.alpha==0) {
+		for (int i = 0; i < 4; i++)
+		{
+			RGBA channels;
+			unpackColorChannels(cols[i], channels);
+			printf("%X => %i %i %i %i\n", cols[i], channels.red, channels.green, channels.blue, channels.alpha);
+		}
+	}
+	sum.red /= sum.alpha;
+	sum.green /= sum.alpha;
+	sum.blue /= sum.alpha;
+
+	if (m_alpha != MAX_ALPHA)
+	{
+
+		sum.red = (base.red * (MAX_ALPHA - m_alpha) + sum.red   * m_alpha) / MAX_ALPHA;
+		sum.green = (base.green * (MAX_ALPHA - m_alpha) + sum.green * m_alpha) / MAX_ALPHA;
+		sum.blue = (base.blue  * (MAX_ALPHA - m_alpha) + sum.blue  * m_alpha) / MAX_ALPHA;
+	}
+
+	sum.alpha = base.alpha;
+
+	return packColorChannels(sum);
+}
+
+
+PIXVAL ImgConverter::mixPixels(PIXVAL cols[]) const
+{
+	if((cols[0] == SIMU_TRANSPARENT) || (m_alpha == 0))
 	{
 		// 左上が透過色の場合・アンチエイリアスなしの場合は左上の値をそのまま利用する
 		return cols[0];
 	}
-	else if (cols[0] & SIMU_SPECIALMASK && m_specialColorMode == scmTOPLEFT)
+
+	switch(m_specialColorMode)
 	{
-		// scmTOPLEFTの場合、左上が特殊色ならその値を使用する。
-		return cols[0];
-	}
-	else if(m_specialColorMode == scmTWO && calcSpecialColor(cols))
-	{
-		return calcSpecialColor(cols);
-	}
-	else
-	{
-		int red = 0;
-		int green = 0;
-		int blue = 0;
-		int t = 0;
-		for(int i = 0; i < 4; i++)
-		{
-			if(cols[i] != SIMU_TRANSPARENT)
-			{
-				PIXVAL col = toRGB(cols[i]);
-				red += col & SIMU_REDMASK;
-				green += col & SIMU_GREENMASK;
-				blue += col & SIMU_BLUEMASK;
-				t++;
-			}
+	case scmTOPLEFT:
+		if (isSpecialColor(cols[0])) {
+			return cols[0];
 		}
-		red  /= t;
-		green /= t;
-		blue /= t;
-		if(m_alpha != MAX_ALPHA)
-		{
-			PIXVAL col = toRGB(cols[0]);
-			red   = ((col & SIMU_REDMASK)   * (MAX_ALPHA - m_alpha) + red   * m_alpha) / MAX_ALPHA;
-			green = ((col & SIMU_GREENMASK) * (MAX_ALPHA - m_alpha) + green * m_alpha) / MAX_ALPHA;
-			blue  = ((col & SIMU_BLUEMASK)  * (MAX_ALPHA - m_alpha) + blue  * m_alpha) / MAX_ALPHA;
+		break;
+	case scmTWO:
+		if (getModeSpecialColor(cols)) {
+			return getModeSpecialColor(cols);
 		}
-		return (red & SIMU_REDMASK)|(green & SIMU_GREENMASK)|(blue & SIMU_BLUEMASK);
+		break;
 	}
+	return mixOpaquePixels(cols);
 }

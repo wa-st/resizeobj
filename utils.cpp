@@ -27,16 +27,16 @@ void parseArg(const char *arg, std::string &key, std::string &value)
 	value = arg;
 }
 
-std::string changeFileExt(const std::string path, const std::string ext)
+std::string changeFileExtension(const std::string path, const std::string newExtension)
 {
 	std::string::size_type dirpos = path.find_last_of("\\/");
 	if(dirpos == std::string::npos) dirpos = 0;
 
 	std::string::size_type pos = path.rfind('.');
 	if(pos == std::string::npos || pos < dirpos)
-		return path + ext;
+		return path + newExtension;
 	else
-		return path.substr(0, pos) + ext;
+		return path.substr(0, pos) + newExtension;
 }
 
 void fileList(std::vector<std::string> &entries, const std::string mask)

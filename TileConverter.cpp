@@ -80,7 +80,7 @@ const char *utypNames[] = {
 
 inline const char *utypeToStr(utyp u)
 {
-	if(u<lengthof(utypNames))
+	if(u < lengthof(utypNames))
 		return utypNames[u];
 	else
 		return "";
@@ -120,8 +120,8 @@ void TileConverter::convertFactorySmoke(PakNode *node) const
 	pfs->offsetX *= 2;
 	pfs->offsetY *= 2;
 	
-	if(pfs->offsetX-3 < -128 || 127 < pfs->offsetX+3
-		|| pfs->offsetY-13 < -128 || 127 < pfs->offsetY+3)
+	if(pfs->offsetX-3 < -128 || 127 < pfs->offsetX + 3
+		|| pfs->offsetY-13 < -128 || 127 < pfs->offsetY + 3)
 	{
 		// SmokeOffset.x +(-3～+3) と SmokeOffset.y +(-13～3)はsint8の範囲でないと困る
 		const char *emptyXREF = "SMOK\0\0";
@@ -138,8 +138,8 @@ void TileConverter::convertSmokeTreeImage(PakNode *node) const
 		SimuImage image;
 		image.load(*node->data());
 
-		image.x -= m_ic->oldTileSize()/ 4;
-		image.y -= m_ic->oldTileSize()/ 4;
+		image.x -= m_ic->oldTileSize() / 4;
+		image.y -= m_ic->oldTileSize() / 4;
 		image.save(*node->data());
 	}
 	else
@@ -165,7 +165,7 @@ void TileConverter::convertBuil(PakNode *node) const
 	utyp ut;
 
 	// ヘッダから必要な値を取ってくるとともにDimsを変換
-	switch(getPakNodeVer(header->ver1_6.version))
+	switch(getPakNodeVer(header->ver1_9.version))
 	{
 	case 0:
 		ut = static_cast<utyp>(header->ver0.utype);
@@ -182,12 +182,12 @@ void TileConverter::convertBuil(PakNode *node) const
 	case 5:
 	case 6:
 	case 7:
-		ut = static_cast<utyp>(header->ver1_6.utype);
-		x = header->ver1_6.x;
-		y = header->ver1_6.y;
-		layouts = header->ver1_6.layouts;
-		header->ver1_6.x = x*2;
-		header->ver1_6.y = y*2;
+		ut = static_cast<utyp>(header->ver1_9.utype);
+		x = header->ver1_9.x;
+		y = header->ver1_9.y;
+		layouts = header->ver1_9.layouts;
+		header->ver1_9.x = x * 2;
+		header->ver1_9.y = y * 2;
 		break;
 	default:
 		throw std::runtime_error(TILECONV_ERROR_UNSUPPORTED_VERSION);
@@ -232,10 +232,10 @@ void TileConverter::convertBuil(PakNode *node) const
 	std::vector<PakNode*> *nodes = node->items();
 	// 子ノードを拡張
 	nodes->reserve(nodes->size() * 4);
-	for(int il=0; il < layouts; il++)
+	for(int il = 0; il < layouts; il++)
 	{
-		int height = il&1 ? x : y;
-		int width  = il&1 ? y : x;
+		int height = (il & 1)? x : y;
+		int width  = (il & 1)? y : x;
 
 		for(int iy=0; iy < height; iy++)
 		{
@@ -260,10 +260,10 @@ void TileConverter::convertBuil(PakNode *node) const
 				PakNode *oldTileNode = it[0];
 				PakNode *newTileNodes[4];
 				for(int i = 0; i < 4; i++) newTileNodes[i] = new PakNode("TILE");
-				it[    0] = newTileNodes[0];
-				it[    1] = newTileNodes[1];
-				it[w*2  ] = newTileNodes[2];
-				it[w*2+1] = newTileNodes[3];
+				it[        0] = newTileNodes[0];
+				it[        1] = newTileNodes[1];
+				it[w * 2    ] = newTileNodes[2];
+				it[w * 2 + 1] = newTileNodes[3];
 
 				convertTile(il, ix, iy, newTileNodes, oldTileNode, w * 2, h * 2);
 
@@ -309,7 +309,7 @@ void TileConverter::convertTile(int layout, int x, int y,
 		throw std::runtime_error(TILECONV_ERROR_UNSUPPORTED_VERSION);
 	}
 
-	for(int i = 0;i<4; i++)
+	for(int i = 0;i < 4; i++)
 	{
 		// 新しいノードにdataをそのままコピーして、
 		*tiles[i]->data() = *srcTile->data();
@@ -410,8 +410,8 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 
 		for(int j = 0; j < oldHeight; j++)
 		{
-			PakNode *img1Node = (*srcImg2)[j];
-			PakNode *imgNode = (*img1Node)[std::min(i, (int)img1Node->length() - 1)];
+			PakNode *img1Node = srcImg2->at(j);
+			PakNode *imgNode = img1Node->at(std::min(i, (int)img1Node->length() - 1));
 			SimuImage img;
 			img.load(*imgNode->data());
 
@@ -476,7 +476,7 @@ void TileConverter::encodeImg2(PakNode *img2, std::vector<Bitmap<PIXVAL>*> &bitm
 		img2->appendChild(img1Node);
 		img1Node->data()->resize(4);
 		unsigned short *img1Header = &img1Node->dataP()->img1;
-		img1Header[0] = bitmaps.size();
+		img1Header[0] = (PIXVAL)(bitmaps.size());
 		img1Header[1] = 0;
 
 		for(unsigned int ip = 0; ip < bitmaps.size(); ip++)
@@ -484,7 +484,7 @@ void TileConverter::encodeImg2(PakNode *img2, std::vector<Bitmap<PIXVAL>*> &bitm
 			PakNode *imgNode = new PakNode("IMG");
 			img1Node->appendChild(imgNode);
 			
-			Bitmap<PIXVAL> bmp(*bitmaps[ip], bx, by + (maxHeight - ih - 1)*height, width, height);
+			Bitmap<PIXVAL> bmp(*bitmaps[ip], bx, by + (maxHeight - ih - 1)* height, width, height);
 
 			// エンコード
 			SimuImage image;

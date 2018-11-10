@@ -258,7 +258,7 @@ void VhclConverter::convertVhclAddon(PakNode *node,  int targetTileSize) const
 		}
 		
 	default:
-		throw std::runtime_error("対応していないVHCL形式の為、lengthを変更できまんせん");
+		throw std::runtime_error("resizeobjが対応していないmakeobjで作成されたPAKファイルです");
 	}
 
 	for(PakNode::iterator it = node->begin(); it != node->end(); it++)

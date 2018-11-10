@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <tchar.h>
 
-// TODO: プログラムに必要な追加ヘッダーをここで参照してください。
 #include <cassert>
 #include <ctype.h>
 
