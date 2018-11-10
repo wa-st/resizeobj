@@ -4,9 +4,6 @@
 
 const char *TILECONV_ERROR_UNSUPPORTED_VERSION = "原寸モードが対応していないバージョンのPAKファイルです";
 const char *TILECONV_ERROR_UNSUPPORTED_TYPE    = "原寸モードが対応していない形式のPAKファイルです";
-//const char *TILECONV_ERROR_FRONTIMAGE = "タイル再分割機能はFrontImageを持つ建物に対応していません";
-const char *TILECONV_ERROR_MOD8   = "画像サイズが8で割れ切れないPAKファイルは原寸モードで変換できません";
-const char *TILECONV_ERROR_OFFSET = TILECONV_ERROR_UNSUPPORTED_TYPE;
 
 // haus_besch.h(rev.2615)から
 enum utyp
@@ -44,46 +41,47 @@ enum utyp
 };
 
 const char *utypNames[] = {
-	"res,com,ind/市内建築物?",
-	"cur(city)/特殊建築物 ",
-	"cur(land)/観光名所",
-	"mon/ 記念碑",
-	"factory/産業施設",
-	"tow/役場",
+	"res,com,ind",
+	"cur(city)",
+	"cur(land)",
+	"mon",
+	"factory",
+	"tow",
 	"__weitere",
-	"hq/本社",
-	"station/鉄道駅",
-	"busstop/バス停",
-	"carstop/トラックヤード",
-	"habour/港",
-	"wharf/運河港",
-	"airport/空港",
-	"manorailstop/モノレール駅",
+	"hq",
+	"station",
+	"busstop",
+	"carstop",
+	"habour",
+	"wharf",
+	"airport",
+	"manorailstop",
 	"",
-	"station(extension)/駅付属",
-	"busstop(extension)/バス停付属",
-	"carstop(extension)/トラックヤード付属",
-	"habour(extension)/港付属",
-	"wharf(extension)/運河港付属",
-	"airport(extension)/空港付属",
-	"manorailstop(extension)/モノレール駅付属"
-};
-
-const utyp utypNames2Top = wartehalle;
-const char *utypNames2[] = {
-	"hall/待合室",
-	"post/郵便局",
-	"shed/倉庫",
-	"depot/車庫",
-	"stop/汎用停車場",
-	"extension/汎用付属"};
+	"station(extension)",
+	"busstop(extension)",
+	"carstop(extension)",
+	"habour(extension)",
+	"wharf(extension)",
+	"airport(extension)",
+	"manorailstop(extension)",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"hall",
+	"post",
+	"shed",
+	"depot",
+	"stop",
+	"extension"};
 
 inline const char *utype2str(utyp u)
 {
 	if(u<lengthof(utypNames))
 		return utypNames[u];
-	else if(utypNames2Top <= u && u < utypNames2Top + lengthof(utypNames2))
-		return utypNames[u - utypNames2Top];
 	else
 		return "";
 }
@@ -130,10 +128,6 @@ void TileConverter::convertFactorySmoke(PakNode *node) const
 		node->clear();
 		node->type("XREF");
 		node->data()->assign(emptyXREF, emptyXREF + 6);
-		printf("    Smoke ⇒ 削除\n");
-	}else{
-		printf("    SmokeOffset=%d,%d ⇒ %d,%d\n", pfs->offsetX/2, pfs->offsetY/2, pfs->offsetX, pfs->offsetX);
-		printf("    SmokeTile=%d,%d ⇒ %d,%d\n", pfs->tileX/2, pfs->tileY/2, pfs->tileX, pfs->tileY);
 	}
 }
 
@@ -144,8 +138,8 @@ void TileConverter::convertSmokeTreeImage(PakNode *node) const
 		SimuImage image;
 		image.load(*node->data());
 
-		image.x -= image.tileSize/4;
-		image.y -= image.tileSize/4;
+		image.x -= m_ic->oldTileSize()/4;
+		image.y -= m_ic->oldTileSize()/4;
 		image.save(*node->data());
 	}
 	else
@@ -196,11 +190,6 @@ void TileConverter::convertBuil(PakNode *node) const
 	default:
 		throw std::runtime_error(TILECONV_ERROR_UNSUPPORTED_VERSION);
 	}
-
-	printf("    Type: %s (%d)\n    Dims: %d,%d,%d ⇒ %d,%d,%d\n",
-		utype2str(ut), static_cast<int>(ut),
-		x,   y,   layouts, x*2, y*2, layouts);
-
 	// 複数タイルに対応している建物形式かチェックする
 	switch(ut)
 	{
@@ -249,7 +238,7 @@ void TileConverter::convertBuil(PakNode *node) const
 		for(int iy=0; iy<height; iy++)
 		{
 			PakNode::iterator it = nodes->begin() + t + (iy + il*height)*width*4;
-			for(int ix=0; ix<width; ix++) it = nodes->insert(it+1, 0) + 1;
+			for(int ix=0; ix<width; ix++) it = nodes->insert(it+1, static_cast<PakNode*>(0)) + 1;
 			nodes->insert(it, width*2, 0);
 		}
 	}
@@ -345,37 +334,8 @@ void TileConverter::convertTile(int layout, int x, int y,
 		for(int j=0; j<4; j++)
 			tiles[j]->appendChild(newImg2Nodes[j] = new PakNode("IMG2"));
 
-		// 変換前の情報を表示
-		PakNode *img2 = *it;
-		for(int j = 0; j<img2->length(); j++)
-		{
-			PakNode *img1 = (*img2)[j];
-			for(int k= 0; k<img1->length(); k++)
-			{
-				std::string info = SimuImage::getInfo(*(*img1)[k]->data());
-				printf("    %sImage[%d][%d][%d][%d][%d][%d]  =(%s)\n", i&1 ? "Front":" Back", layout, x/2, y/2, j, k, i/2, info.c_str());
-			}
-		}
-
 		// IMG2を変換
 		convertImg2(x, y, newImg2Nodes, *it, phasen);
-
-		// 変換後の情報を表示
-		for(int i2 = 0; i2 < 4; i2++)
-		{
-			int lx = x + (i2&1);
-			int ly = y + (i2/2);
-			PakNode *img2 = newImg2Nodes[i2];
-			for(int j = 0; j<img2->length(); j++)
-			{
-				PakNode *img1 = (*img2)[j];
-				for(int k= 0; k<img1->length(); k++)
-				{
-					std::string info = SimuImage::getInfo(*(*img1)[k]->data());
-					printf("    ⇒%sImage[%d][%d][%d][%d][%d][%d]=(%s)\n", i&1 ? "Front":" Back", layout, lx, ly, j, k, i/2, info.c_str());
-				}
-			}
-		}
 
 		it++;
 	}
@@ -410,26 +370,25 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 		throw std::logic_error(TILECONV_ERROR_UNSUPPORTED_TYPE);
 
 	// タイルサイズとversionを取り出す。
-	int version;
-	int oldTileSize=0;
 	int oldHeight = srcImg2->length();
+	int version;
+	bool hasImage = false;
 	for(PakNode::iterator it = srcImg2->begin(); it != srcImg2->end(); it++)
 	{
 		PakNode *imgNode  = *(*it)->begin();
 		SimuImage img;
 		img.load(*imgNode->data());
-		oldTileSize = img.tileSize;
-		if(oldTileSize != 0)
+		if(0<img.width)
 		{
 			version = img.version;
+			hasImage = true;
 			break;
 		}
 	}
-
-	if(oldTileSize==0)
+	if(!hasImage)
 	{
-		// FrontImageなど画像を指定していない場合⇒img2->items()が空でoldTileSize==0となる。
-		// 空白画像を指定している場合⇒SimuImage::tilSize==0でありoldTileSize==0となる。
+		// 画像が指定されていなかったり空白画像が指定されていた場合は、
+		// ノードをコピーするだけで終わり。
 		for(int i=0; i<4; i++)
 		{
 			*img2s[i]->data() = *srcImg2->data();
@@ -439,15 +398,11 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 		return;
 	}
 
-	// 8で割り切れないのは、ちょっと困る。
-	if(oldTileSize%8 != 0)
-		throw std::runtime_error(TILECONV_ERROR_MOD8);
-
 	std::vector<Bitmap<PIXVAL>*> bitmaps;
 	// 画像データをビットマップに展開する。
 	for(int i = 0; i<phasen; i++)
 	{
-		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(oldTileSize, oldTileSize * (oldHeight+1));
+		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(m_ic->oldTileSize()*2, m_ic->oldTileSize() * (oldHeight+1));
 		bitmaps.push_back(bmp);
 		bmp->clear(SIMU_TRANSPARENT);
 
@@ -460,10 +415,7 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 
 			int imgx, imgy, imgw, imgh;
 			img.getBounds(imgx, imgy, imgw, imgh);
-			if(imgx<0 || oldTileSize < imgx+imgw || imgh<0 || oldTileSize < imgy + imgh)
-				throw std::runtime_error(TILECONV_ERROR_OFFSET);
-
-			img.drawTo(imgx, imgy + (oldHeight-j)*oldTileSize, *bmp);
+			img.drawTo(imgx, imgy + (oldHeight-j)*m_ic->oldTileSize(), *bmp);
 		}
 	}
 
@@ -490,8 +442,8 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 	　│　　□□□□　　│
 	　└────────┘
 	*/
-	const int E=oldTileSize/8;
-	const int by=oldHeight*oldTileSize;
+	const int E=m_ic->oldTileSize()/8;
+	const int by=oldHeight*m_ic->oldTileSize();
 
 	encodeImg2(img2s[0], bitmaps, 2*E, by + 2*E,           1, 4*E, 3*E, version);
 	encodeImg2(img2s[3], bitmaps, 2*E, by + 4*E,           1, 4*E, 4*E, version);

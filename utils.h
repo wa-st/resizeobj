@@ -44,3 +44,7 @@ std::string changeFileExt(const std::string path, const std::string ext);
 
 /** ディレクトリ直下のファイル一覧を作成する. */
 void fileList(std::vector<std::string> &entries, const std::string mask);
+
+/** エラーダイアログを表示する */
+void showErrorDialog(const char *message, const char* caption);
+

@@ -2,6 +2,7 @@
 #include "paknode.h"
 
 const char *SIMU_SIGNATURE = "Simutrans object file";
+const unsigned short LARGE_RECORD_SIZE = 0xFFFFu;
 
 template<class T> inline void readbin(std::istream &s, T&v)
 {
@@ -23,7 +24,8 @@ std::string readsstrlen(std::istream &s, int len)
 		int ch = s.get();
 		if(ch=='\0')
 		{
-			s.seekg((std::streamoff)(len-1), std::ios_base::cur);
+			len--;
+			for(;len>0; len--) s.get();
 			break;
 		}
 		x += (char)ch;
@@ -64,6 +66,8 @@ void PakNode::load(std::istream &src)
 	m_type = readsstrlen(src, NODE_NAME_LENGTH);
 	count  = readnum<unsigned short>(src);
 	size   = readnum<unsigned short>(src);
+	if(size==LARGE_RECORD_SIZE)
+		size = readnum<unsigned int>(src);
 
 	loadData(src, size);
 	for(int i=0; i<count; i++)
@@ -82,19 +86,15 @@ void PakNode::save(std::ostream &dest) const
 	writestrlen(dest, m_type, NODE_NAME_LENGTH);
 	dest.write(pointer_cast<char*>(&count), 2);
 
-	//// データサイズの書き込む位置を覚えておく
-	//std::ostream::pos_type sizePos = dest.tellp();
-	//dest.write(pointer_cast<char*>(&size),  2);
-	//// データを書き込む
-	//writeData(dest);
-	//// データサイズを書き込む。
-	//std::ostream::pos_type dataEndPos = dest.tellp();
-	//dest.seekp(sizePos);
-	//size = dataEndPos-sizePos-2;
-	//dest.write(pointer_cast<char*>(&size),  2);
-	//dest.seekp(dataEndPos);
 	size = m_data.size();
-	dest.write(pointer_cast<char*>(&size),  2);
+	if(size<LARGE_RECORD_SIZE)
+	{
+		dest.write(pointer_cast<char*>(&size),  2);
+	}else{
+		dest.write(pointer_cast<const char*>(&LARGE_RECORD_SIZE), 2);
+		dest.write(pointer_cast<char*>(&size), 4);
+	}
+
 	if(size) dest.write(pointer_cast<const char*>(data_p()), size);
 
 	for(const_iterator it = begin(); it!=end(); it++) (*it)->save(dest);
@@ -165,34 +165,4 @@ void PakFile::saveToFile(const std::string filename) const
 	if(dest.fail()) throw std::runtime_error(std::string("ファイルを開けません。: ")+filename);
 	save(dest);
 	dest.close();
-}
-
-
-std::string nodeStrings(PakNode::const_iterator begin, PakNode::const_iterator end)
-{
-	std::string result = "";
-	for(PakNode::const_iterator it = begin; it != end; it++)
-	{
-		std::string s = nodeStrings(*it);
-		if(s.size())
-		{
-			if(result.size()) result += " / ";
-			result += s;
-		}
-	}
-	return result;
-}
-
-std::string nodeStrings(const PakNode *node)
-{
-	if(node->type()=="TEXT")
-	{
-		return std::string(node->data_p()->text);
-	}else{
-		std::string result = nodeStrings(node->begin(), node->end());
-		if (result.size())
-			return "(" + result + ")";
-		else
-			return result;
-	}
 }

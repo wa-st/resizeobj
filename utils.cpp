@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "utils.h"
 
+#define NOMINMAX
+#include <windows.h>
+
 void parseArg(const char *arg, std::string &key, std::string &value)
 {
 	const char *argTop = arg;
@@ -56,3 +59,9 @@ void fileList(std::vector<std::string> &entries, const std::string mask)
 		FindClose(h);
 	}
 }
+
+
+void showErrorDialog(const char *message, const char* caption)
+{
+	MessageBox(0, message, caption, MB_OK | MB_APPLMODAL | MB_ICONERROR);
+};

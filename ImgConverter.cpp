@@ -35,9 +35,6 @@ void ImgConverter::convertImage(PakNode *node) const
 	SimuImage image;
 	image.load(*node->data());
 
-	std::string info = image.info();
-	printf("    画像:%s\n", info.c_str());
-
 	if(image.data.size()>0)
 	{
 		if(image.zoomable)
@@ -49,17 +46,19 @@ void ImgConverter::convertImage(PakNode *node) const
 				image.save(*node->data());
 		}
 	}
-	info = image.info();
-	printf("       ⇒%s\n", info.c_str());
 }
 
 bool ImgConverter::cutImageMargin(SimuImage &image) const
 {
+	// IMG ver2以降では右余白を記録しなくなったので、変換の必要性なし。
+	if(image.version>=2)
+		return false;
+
 	int l, r;
 	calcImageColMargin(image.height, image.data.begin(), l, r);
 
 	// 下側・右側にtileSize/2以上の余白があれば……
-	if(image.height<= image.tileSize/2 && r >= image.tileSize/2)
+	if(image.height<= newTileSize() && r >= newTileSize())
 	{
 		int x, y, w, h;
 		// 一度ビットマップに展開して……
@@ -68,7 +67,7 @@ bool ImgConverter::cutImageMargin(SimuImage &image) const
 		bitmap.clear(SIMU_TRANSPARENT);
 		image.drawTo(0, 0, bitmap);
 		// 右余白を切り捨てる。下余白は元から存在しないから気にしない。
-		Bitmap<PIXVAL> newBitmap(bitmap, 0, 0, image.tileSize/2, bitmap.height());
+		Bitmap<PIXVAL> newBitmap(bitmap, 0, 0, newTileSize(), bitmap.height());
 		// 再エンコード
 		image.encodeFrom(newBitmap, x, y, false);
 		return true;

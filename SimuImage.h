@@ -28,7 +28,6 @@ class SimuImage
 public:
 	int version;
 	int x, y, width, height;
-	int tileSize;
 	bool zoomable;
 	std::vector<PIXVAL> data;
 
@@ -43,16 +42,16 @@ public:
 	/// 画像データをビットマップに展開する。
 	void drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const;
 	/// ビットマップから画像データを作る。
-	void encodeFrom(const Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
+	void encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 		bool canEmpty);
 private:
 	std::string info(int dataLen) const;
 	int loadHeader(const std::vector<char> &buffer, int &len);
-	template<class T> int loadHeaderStruct(T *header);
 };
 
-/// ビットマップから上下の余白幅を計算する
-void calcBitmapRowMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom);
+/// ビトマップの上下左右の余白を計算する。
+/// 全て透過色なら、top=left=0,botom=height, right=width
+void calcBitmapMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom, int &left, int &right);
 /// 画像データから左右の余白幅を計算する
 void calcImageColMargin(int height, std::vector<PIXVAL>::const_iterator it, int &left, int &right);
 

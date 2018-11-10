@@ -3,7 +3,7 @@
 
 #include "SimuImage.h"
 
-void VhclConverter::convertImage(PakNode *node, int index) const
+void VhclConverter::convertImage(PakNode *node, int index, int targetTileSize, int waytype) const
 {
 	SimuImage image;
 	image.load(*node->data());
@@ -12,19 +12,19 @@ void VhclConverter::convertImage(PakNode *node, int index) const
 	image.save(*node->data());
 }
 
-void VhclConverter::convertImageList(PakNode *node) const
+void VhclConverter::convertImageList(PakNode *node, int targetTileSize, int waytype) const
 {
 	int i=0;
 	for(PakNode::iterator it = node->begin(); it != node->end(); it++, i++)
-		convertImage(*it, i);
+		convertImage(*it, i, targetTileSize, waytype);
 }
 
-void VhclConverter::convertImageList2(PakNode *node) const
+void VhclConverter::convertImageList2(PakNode *node, int targetTileSize, int waytype) const
 {
 	for(PakNode::iterator it = node->begin(); it != node->end(); it++)
 	{
 		if((*it)->type()=="IMG1")
-			convertImageList(*it);
+			convertImageList(*it, targetTileSize, waytype);
 	}
 }
 
@@ -137,66 +137,68 @@ int loadOldVhclHeader(_PakVhclFieldsVer7 &fields, int version, char* p)
 	fields.sound      = (version>=1)? readUI8(p):
 	                                  static_cast<unsigned char>(readUI16(p));
 	unsigned char
-	   prev_enginetype= (version>=6)? readUI8(p): 0;                                 //
-	fields.length     = (version>=7)? readUI8(p): 8;                                 // 車両の長さ。ver7以降登場。
+	   prev_enginetype= (version>=6)? readUI8(p):                                    //
+	                                  0;
+	fields.length     = (version>=7)? readUI8(p):                                    // 車両の長さ。ver7以降登場。
+	                                  8;
 	fields.prevs      = (version>=1)? readUI8(p):                                    // 前方連結可能車両。ver1のみ16bit
 	                                  static_cast<unsigned char>(readUI16(p));
 	fields.nexts      = (version>=1)? readUI8(p):                                    // 後方連結可能車両。ver1のみ16bit
 	                                  static_cast<unsigned char>(readUI16(p));
 	fields.enginetype = (version>=6)? prev_enginetype:                               
-	                    (version>=2)? readUI8(p):                                    // ver1にはエンジン形式がないのでsmokeから推測する
-	                    ((fields.sound==3) ? vehikel_besch_t_steam : vehikel_besch_t_diesel);
+	                    (version>=2)? readUI8(p):                                    // ver1にはエンジン形式がないので音から推測する
+	                                  ((fields.sound==3) ? vehikel_besch_t_steam : vehikel_besch_t_diesel);
 
 	if(electricEngine) fields.enginetype = vehikel_besch_t_electric;
 
 	return p - top;
 }
 
-void VhclConverter::convertVhclAddon(PakNode *node) const
+void VhclConverter::convertVhclAddon(PakNode *node,  int targetTileSize) const
 {
+	unsigned char waytype;
+
+	char* data = pointer_cast<char*>(node->data_p());
+	int version = GetPakNodeVer(*pointer_cast<unsigned short*>(data));
+	switch(version)
+	{
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+		{
+			//ver0 ～ ver6のヘッダにはlengthが存在しないのでver7ヘッダに変換した上でlengthを倍にする。
+			_PakVhclFieldsVer7 ver7h;
+			int headerSize = loadOldVhclHeader(ver7h, version, data);
+			ver7h.version = 0x8007;
+			ver7h.length  = ver7h.length*2;
+			node->data()->insert(node->data()->begin(), sizeof(_PakVhclFieldsVer7) - headerSize, 0);
+			*pointer_cast<_PakVhclFieldsVer7*>(node->data_p()) = ver7h;
+
+			waytype = ver7h.waytype;
+			break;
+		}
+	case 7:
+	case 8:
+		{
+			_PakVhclFieldsVer7 *ver7h = pointer_cast<_PakVhclFieldsVer7*>(data);
+			ver7h->length = ver7h->length * 2;
+
+			waytype = ver7h->waytype;
+			break;
+		}
+	default:
+		throw std::runtime_error("対応していないVHCL形式の為、lengthを変更できまんせん");
+	}
+
 	for(PakNode::iterator it = node->begin(); it != node->end(); it++)
 	{
 		if((*it)->type()=="IMG1")
-			convertImageList(*it);
+			convertImageList(*it, targetTileSize, waytype);
 		else if ((*it)->type()=="IMG2")
-			convertImageList2(*it);
-	}
-
-	if(m_lengthMode != NO_CONVERT_LENGTH)
-	{
-		char* data = pointer_cast<char*>(node->data_p());
-		int version = GetPakNodeVer(*pointer_cast<unsigned short*>(data));
-		switch(version)
-		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-			{
-				//ver0 ～ ver6のヘッダにはlengthが存在しないのでver7ヘッダに変換した上でlengthを倍にする。
-				_PakVhclFieldsVer7 ver7h;
-				int headerSize = loadOldVhclHeader(ver7h, version, data);
-				ver7h.version = 0x8007;
-				ver7h.length  = ver7h.length*2;
-				node->data()->insert(node->data()->begin(), sizeof(_PakVhclFieldsVer7) - headerSize, 0);
-				*pointer_cast<_PakVhclFieldsVer7*>(node->data_p()) = ver7h;
-				break;
-			}
-		case 7:
-		case 8:
-			{
-				_PakVhclFieldsVer7 *ver7h = pointer_cast<_PakVhclFieldsVer7*>(data);
-				ver7h->length = ver7h->length * 2;
-				break;
-			}
-		default:
-			if(m_lengthMode == STRICT_CONVERT_LENGTH)
-				throw std::runtime_error("対応していないVHCL形式の為、lengthを変更できまんせん");
-			printf("    対応していないVHCL形式の為、lengthの変更をスキップします。\n");      
-			
-		}
+			convertImageList2(*it, targetTileSize, waytype);
 	}
 }

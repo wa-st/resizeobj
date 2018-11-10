@@ -2,6 +2,9 @@
 
 #include "utils.h"
 
+
+const int NODE_NAME_LENGTH = 4;
+
 #pragma pack(push, 1)
 
 struct PakImgBeschVer0
@@ -16,10 +19,10 @@ struct PakImgBeschVer0
 	unsigned char dummy2;
 };
 
-struct PakImgBeschVer1
+struct PakImgBeschVer1_2
 {
-	unsigned short x;
-	unsigned short y;
+	signed short x;
+	signed short y;
 	unsigned char w;
 	unsigned char h;
 	unsigned char version;
@@ -27,10 +30,21 @@ struct PakImgBeschVer1
 	unsigned char zoomable;
 };
 
+struct PakImgBeschVer3
+{
+	signed short x;
+	signed short y;
+	unsigned short w;
+	unsigned char  version;
+	unsigned short h;
+	unsigned char zoomable;
+};
+
 union PakImgBesch
 {
 	PakImgBeschVer0 ver0;
-	PakImgBeschVer1 ver1;
+	PakImgBeschVer1_2 ver1_2;
+	PakImgBeschVer3 ver3;
 };
 
 struct PakFactorySmoke
@@ -188,13 +202,6 @@ public:
 		void signature(const std::string value){ m_signature = value; }
 		int version() const{ return m_version; }
 };
-
-
-const int NODE_NAME_LENGTH = 4;
-
-std::string nodeStrings(const PakNode *node);
-std::string nodeStrings(PakNode::const_iterator begin, PakNode::const_iterator end);
-
 
 inline int GetPakNodeVer(unsigned short v)
 {

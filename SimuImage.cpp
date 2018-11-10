@@ -1,6 +1,14 @@
 #include "StdAfx.h"
 #include "SimuImage.h"
 
+/*
+           左右余白  上下余白     x,y
+----------+---------+------------+----------------------------------
+IMG v0     含む      含まない     左余白を含まない左上頂点, 負数不可
+IMG v1     含む      含まない     左余白を含む左上頂点, 負数可
+IMG v2/v3  含まない  含まない     左余白を含まない左上頂点, 負数可
+*/
+
 const PIXVAL rgbtable[] = {
 	// プレイヤーカラー1
 	To555(0x244B67),
@@ -38,33 +46,31 @@ const PIXVAL rgbtable[] = {
 	To555(0x0101FF),
 };
 
-void calcBitmapRowMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom)
+void calcBitmapMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom, int &left, int &right)
 {
-	int line = 0;
-	for(int y=bmp.height()-1; y>=0; y--)
-	{
-		if(bmp.end(y) != std::find_if(bmp.begin(y), bmp.end(y),
-			std::bind1st(std::not_equal_to<PIXVAL>(), SIMU_TRANSPARENT)))
-			break;
-		line++;
-	}
-	bottom = line;
-
-	line = 0;
-	if(bottom<bmp.height())
-	{
-		for(int y=0; y<bmp.height(); y++)
+	int w = bmp.width();
+	int h = bmp.height();
+	top = h;
+	bottom = h;
+	left = w;
+	right = w;
+	for(int y = h-1; y>=0; y--)
+		for(int x = w-1; x>=0; x--)
 		{
-			if(bmp.end(y) != std::find_if(bmp.begin(y), bmp.end(y),
-				std::bind1st(std::not_equal_to<PIXVAL>(), SIMU_TRANSPARENT)))
-				break;
-			line++;
+			if(bmp.pixel(x, y)!= SIMU_TRANSPARENT)
+			{
+				top    = std::min(top, y);
+				bottom = std::min(bottom, h-y-1);
+				left   = std::min(left, x);
+				right  = std::min(right, w-x-1);
+			}
 		}
-		top = line;
-	}else{
-		top = 0;
-	}
 
+	if(bottom==h)
+	{
+		top  = 0;
+		left = 0;
+	}
 }
 
 void calcImageColMargin(int height, std::vector<PIXVAL>::const_iterator it, int &left, int &right)
@@ -117,8 +123,7 @@ std::string SimuImage::info(int dataLen) const
 	oss << ","   << std::setw(3) << this->y;
 	oss << "]/[" << std::setw(3) << this->width;
 	oss << "x"   << std::setw(3) << this->height;
-	oss << "]/"  << std::setw(7) << dataLen << " words/";
-	oss << std::setw(3) << this->tileSize;
+	oss << "]/"  << std::setw(7) << dataLen << " words";
 	return oss.str();
 }
 
@@ -142,51 +147,43 @@ int SimuImage::loadHeader(const std::vector<char> &buffer, int &len)
 	int headerSize;
 
 	const PakImgBesch *header = pointer_cast<const PakImgBesch*>(&buffer[0]);
-	this->version = header->ver1.version;
+	this->version = header->ver1_2.version;
 
 	switch(this->version)
 	{
 	case 0:
 		headerSize = sizeof(PakImgBeschVer0);
-		len = loadHeaderStruct(&header->ver0);
+		this->x        = header->ver0.x;
+		this->y        = header->ver0.y;
+		this->width    = header->ver0.w;
+		this->height   = header->ver0.h;
+		this->zoomable = header->ver0.zoomable != 0;
+		len            = header->ver0.len;
 		break;
 	case 1:
-		headerSize = sizeof(PakImgBeschVer1);
-		len = loadHeaderStruct(&header->ver1);
+	case 2:
+		headerSize = sizeof(PakImgBeschVer1_2);
+		this->x        = header->ver1_2.x;
+		this->y        = header->ver1_2.y;
+		this->width    = header->ver1_2.w;
+		this->height   = header->ver1_2.h;
+		this->zoomable = header->ver1_2.zoomable != 0;
+		len            = header->ver1_2.len;
+		break;
+	case 3:
+		headerSize = sizeof(PakImgBeschVer3);
+		this->x        = header->ver3.x;
+		this->y        = header->ver3.y;
+		this->width    = header->ver3.w;
+		this->height   = header->ver3.h;
+		this->zoomable = header->ver3.zoomable != 0;
+		len            = (buffer.size() - headerSize)/sizeof(PIXVAL);
 		break;
 	default:
 		throw std::runtime_error("対応していない画像形式です。");
 	}
 
-	if(len>0)
-	{
-		const PIXVAL *p = pointer_cast<const PIXVAL*>(pointer_cast<const char*>(header)+headerSize);
-		
-		int lineWidth=0;
-		int transparentLen = *p++;
-		do{
-			lineWidth += transparentLen;
-			int opaqueLen = *p++;
-			lineWidth += opaqueLen;
-			p         += opaqueLen;
-			transparentLen = *p++;
-		}while(transparentLen>0);
-		tileSize = lineWidth;
-	}else
-		tileSize = 0;
-
 	return headerSize;
-}
-
-template<class T>
-int SimuImage::loadHeaderStruct(T *header)
-{
-	this->x = header->x;
-	this->y = header->y;
-	this->width = header->w;
-	this->height= header->h;
-	this->zoomable = header->zoomable != 0;
-	return header->len;
 }
 
 void SimuImage::save(std::vector<char> &buffer)
@@ -194,10 +191,19 @@ void SimuImage::save(std::vector<char> &buffer)
 	if(x<0 || y < 0)
 	{
 		// ver0ヘッダではオフセットに負数を使えないっぽい。
-		version = 1;
+	   if(version==0)
+		{
+			int offsetX, offsetY, width, height;
+			getBounds(offsetX, offsetY, width, height);
+			MemoryBitmap<PIXVAL> bmp(width, height);
+			bmp.clear(SIMU_TRANSPARENT);
+			drawTo(0,0, bmp);
+			version = 1;
+			encodeFrom(bmp, offsetX, offsetY, true);
+		}
 	}
 
-	int headerSize = version == 0 ? sizeof(PakImgBeschVer0) : sizeof(PakImgBeschVer1);
+	int headerSize = version == 0 ? sizeof(PakImgBeschVer0) : sizeof(PakImgBeschVer1_2);
 
 	buffer.resize(headerSize + data.size() * sizeof(PIXVAL));
 
@@ -215,14 +221,22 @@ void SimuImage::save(std::vector<char> &buffer)
 		header->ver0.dummy2   = 0;
 		break;
 	case 1:
-		header->ver1.x   = static_cast<unsigned short>(this->x);
-		header->ver1.y   = static_cast<unsigned short>(this->y);
-		header->ver1.w   = static_cast<unsigned char>(this->width);
-		header->ver1.h   = static_cast<unsigned char>(this->height);
-		header->ver1.len = static_cast<unsigned short>(data.size());
-		header->ver1.zoomable = this->zoomable ? 1 : 0;
-		header->ver1.version  = 1;
+	case 2:
+		header->ver1_2.x   = static_cast<signed short>(this->x);
+		header->ver1_2.y   = static_cast<signed short>(this->y);
+		header->ver1_2.w   = static_cast<unsigned char>(this->width);
+		header->ver1_2.h   = static_cast<unsigned char>(this->height);
+		header->ver1_2.len = static_cast<unsigned short>(data.size());
+		header->ver1_2.zoomable = this->zoomable ? 1 : 0;
+		header->ver1_2.version  = this->version;
 		break;
+	case 3:
+		header->ver3.x   = static_cast<signed short>(this->x);
+		header->ver3.y   = static_cast<signed short>(this->y);
+		header->ver3.w   = static_cast<unsigned short>(this->width);
+		header->ver3.h   = static_cast<unsigned short>(this->height);
+		header->ver3.zoomable = this->zoomable ? 1 : 0;
+		header->ver3.version  =3;
 	}
 	if(data.size()>0)
 		memcpy(pointer_cast<char*>(header) + headerSize, &data[0], data.size()*sizeof(PIXVAL));
@@ -230,17 +244,30 @@ void SimuImage::save(std::vector<char> &buffer)
 
 void SimuImage::getBounds(int &offsetX, int &offsetY, int &width, int &height) const
 {
-	int pl, pr;
-	calcImageColMargin(this->height, this->data.begin(), pl, pr);
+	if(this->version<=1)
+	{
+		int pl, pr;
+		calcImageColMargin(this->height, this->data.begin(), pl, pr);
 	
-	offsetX = this->x - pl;
-	offsetY = this->y;
-	width   = this->width + pl + pr;
-	height  = this->height;
+		offsetX = this->x - pl;
+		offsetY = this->y;
+		width   = this->width + pl + pr;
+		height  = this->height;
+	}else{
+		// IMG v2以降
+		offsetX = this->x;
+		offsetY = this->y;
+		width   = this->width;
+		height  = this->height;
+	}
 }
 
 void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 {
+	if(bx<0 || by<0 || bmp.width() < bx + this->width || bmp.height() < by + this->height)
+		throw std::runtime_error("画像境界エラー");
+
+
 	std::vector<PIXVAL>::const_iterator it = this->data.begin();
 
 	for(int iy = 0; iy< this->height; iy++)
@@ -253,7 +280,7 @@ void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 			for(int i=0; i<runlen; i++)
 			{
 				PIXVAL val = *it++;
-				// 99.09より昔ではプレイヤーカラーの値が一つずれるらしい
+				// IMG v0ではプレイヤーカラーの値が一つずれるらしい
 				if(this->version==0 && 0x8000u<= val && val <= 0x800Fu) val++;
 				*bp++ = val;
 			}
@@ -262,36 +289,49 @@ void SimuImage::drawTo(int bx, int by, Bitmap<PIXVAL> &bmp) const
 	}
 }
 
-void SimuImage::encodeFrom(const Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
+void SimuImage::encodeFrom(Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 									bool canEmpty)
 {
 	// 上下の余白を計算する。
-	int pt, pb;
-	calcBitmapRowMargin(bmp, pt, pb);
+	int pt, pb, pl, pr;
+	calcBitmapMargin(bmp, pt, pb, pl, pr);
 
-	if(pt+pb < bmp.height())
+	Bitmap<PIXVAL> subBitmap(bmp,
+		this->version>=2 ? pl : 0,
+		pt,
+		this->version>=2 ?  bmp.width()-pl-pr : bmp.width(),
+		bmp.height()-pt-pb);
+
+	if(subBitmap.height()>0)
 	{
-		// 上下の余白は除くが左右の余白は含めてエンコードする。
 		data.resize(0);
-		for(int iy=pt; iy<bmp.height()-pb; iy++)
+		for(int iy=0; iy<subBitmap.height(); iy++)
 		{
-			Bitmap<PIXVAL>::const_iterator it= bmp.begin(iy);
-			Bitmap<PIXVAL>::const_iterator end= bmp.end(iy);
+			Bitmap<PIXVAL>::const_iterator end= subBitmap.end(iy);
+			Bitmap<PIXVAL>::const_iterator it= subBitmap.begin(iy);
+
 			do{
 				int transparentLen = 0;
 				while(it != end && *it == SIMU_TRANSPARENT)
 				{
 					it++; transparentLen++;
 				}
-				data.push_back(transparentLen);
 
+				// rev.3088
+				// IMG v2以降では右の余白を飛ばす。それ以前のバージョンでは余白を含める。
+				if(this->version>=2)
+				{
+					if(it==end && transparentLen < subBitmap.width()) break;
+				}
+				data.push_back(transparentLen);
+				
 				int opaqueLenIndex = data.size();
 				data.push_back(0);
 				while(it != end && *it != SIMU_TRANSPARENT)
 				{
 					PIXVAL val = *it++;
-					// 99.09より昔ではプレイヤーカラーの値が一つずれるらしい
-					if(this->version==0 && 0x8000u<= val && val <= 0x800Fu) val--;
+					// IMG v0ではプレイヤーカラーの値が一つずれるらしい
+					if(this->version==0 && 0x8000u< val && val <= 0x800Fu) val--;
 					data.push_back(val);
 				}
 				data[opaqueLenIndex] = data.size() - opaqueLenIndex - 1;
@@ -299,15 +339,10 @@ void SimuImage::encodeFrom(const Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 			data.push_back(0);
 		}
 
-		// 左右の余白を計算する。
-		int pl, pr;
-		calcImageColMargin(bmp.height()-pt-pb, this->data.begin(), pl, pr);
-		
 		this->x      = offsetX + pl;
 		this->y      = offsetY + pt;
 		this->width  = bmp.width() - pl - pr;
 		this->height = bmp.height() - pt - pb;
-		this->tileSize = bmp.width();
 
 	}else{
 		if(canEmpty)
@@ -317,23 +352,12 @@ void SimuImage::encodeFrom(const Bitmap<PIXVAL> &bmp, int offsetX, int offsetY,
 			this->y     = offsetY + 1;
 			this->width = 0;
 			this->height= 0;
-			this->tileSize=0;
 		}else{
-			// サイズ0のビットマップでは困る場合は、底辺中央に灰色のピクセルを一個置く。
-			// 
-			// width=0/height=1/data={0x0000,0x0000,0x0000}ならピクセルを置かずに行けるのかな？
-			data.resize(0);
-			data.push_back(bmp.width()/2-1); // □
-			data.push_back(1);               // ■
-			data.push_back(0x4210);          //   #808080
-			data.push_back(bmp.width()/2);   // □
-			data.push_back(0);               // ■
-			data.push_back(0);               // □
-			this->x     = offsetX + bmp.width()/2-1;
-			this->y     = offsetY + bmp.height()-1;
-			this->width = 1;
-			this->height= 1;
-			this->tileSize=bmp.width();
+			// サイズ0のビットマップでは困る場合は、灰色のピクセルを一個置いて改めてエンコード。
+			MemoryBitmap<PIXVAL> onePixelBitmap(bmp.width(), 1);
+			onePixelBitmap.clear(SIMU_TRANSPARENT);
+			onePixelBitmap.pixel(0,0) = To555(0x808080);
+			encodeFrom(onePixelBitmap, 0, 0, true);
 		}
 	}
 }

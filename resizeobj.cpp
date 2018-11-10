@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 
+#include <fcntl.h>
+#include <io.h>
+
 #include "utils.h"
 #include "paknode.h"
 #include "ImgConverter.h"
@@ -19,16 +22,17 @@ public:
 		m_tc.imgConverter(&m_ic);
 	};
 
-	void convertFilemask(std::string filemask) const;
+	void convertStdIO() const;
+	void convertFile(std::string filename) const;
 
 	void antialias(int val){ m_ic.alpha(val); };
 	void addonPrefix(std::string val){ m_addonPrefix = val; };
 	void newExtension(std::string val){ m_newExt = val; };
 	void headerRewriting(bool val){ m_headerRewriting = val;};
 	void keepImageSize(bool val){ m_keepImageSize = val; };
-	void lengthMode(LengthMode val){ m_vc.lengthMode(val); };
 	void specialColorMode(SCConvMode val){ m_ic.specialColorMode(val); };
 	void tileNoAnimation(bool val){ m_tc.noAnimation(val); };
+	void newTileSize(int val){ m_ic.newTileSize(val); };
 private:
 	ImgConverter m_ic;
 	VhclConverter m_vc;
@@ -38,7 +42,6 @@ private:
 	bool m_keepImageSize;
 	std::string m_newExt;
 
-	void convertFile(std::string filename) const;
 	void convertPak(PakFile &pak) const;
 	void convertAddon(PakNode *addon) const;
 };
@@ -100,37 +103,43 @@ void renameobj(PakNode *node, std::string prefix)
 }
 
 
+std::string addonName(PakNode *node)
+{
+	if(node->type()=="TEXT")
+		return node->data_p()->text;
+	else if(node->length()>0)
+		return addonName((*node)[0]);
+	else	
+		return "";
+}
+
+
+
 void ResizeObj::convertAddon(PakNode *addon) const
 {
-	std::string name = nodeStrings(addon->begin(), addon->end());
-	printf("  アドオン -- %s:\n", name.c_str());
+	std::clog << "    " << addonName(addon) << std::endl;
 
 	if(m_keepImageSize)
 	{
 		if(addon->type() == "VHCL")
 		{
-			printf("    乗り物の画像表示位置を調整します。\n");
-			m_vc.convertVhclAddon(addon);
+			m_vc.convertVhclAddon(addon, m_ic.newTileSize());
 		}
 		else if(addon->type() == "SMOK")
 		{
-			printf("    煙の画像表示位置を調整します。\n");
 			m_tc.convertAddon(addon);
 		}
 		else if(addon->type() == "BUIL" || addon->type() == "FACT"
 			  || addon->type() == "FIEL")
 		{
-			printf("    建築物のタイル数を拡大します。\n");
 			m_tc.convertAddon(addon);
 		}
 	}else{
-		printf("    画像を縮小します。\n");
 		m_ic.convertAddon(addon);
 	}
 
 	if(m_addonPrefix.size())
 	{
-		printf("    アドオン名を変更します。\n");
 		renameobj(addon, m_addonPrefix);
 	}
 }
@@ -145,74 +154,66 @@ void ResizeObj::convertPak(PakFile &pak) const
 		convertAddon(*it);
 }
 
+void ResizeObj::convertStdIO() const
+{
+	_setmode(_fileno(stdin), _O_BINARY);
+	_setmode(_fileno(stdout), _O_BINARY);
+
+	PakFile pak;
+	pak.load(std::cin);
+	convertPak(pak);
+	pak.save(std::cout);
+}
+
 void ResizeObj::convertFile(std::string filename) const
 {
-	puts("====================================");
-	printf("ファイル -- %s:\n", filename.c_str());
+	std::clog << filename << std::endl;
+
 
 	PakFile pak;
 	pak.loadFromFile(filename);
 
 	if (pak.signature().find(my_signature)!=std::string::npos)
 	{
-		puts("  スキップしました.");
+		std::clog << "    skipped." << std::endl;
 		return;
 	}
 
 	convertPak(pak);
 
-	if(m_newExt != "")
-		filename = changeFileExt(filename, m_newExt);
+	if(m_newExt != "") filename = changeFileExt(filename, m_newExt);
 
-#ifdef _DEBUG
-	// 「-E=NUL」でファイル出力無し
-	if(m_newExt == "NUL") return;
-#endif
 	pak.saveToFile(filename);
 }
 
-void ResizeObj::convertFilemask(std::string filemask) const
-{
-	if (filemask.find_first_of("*?")==std::string::npos)
-	{
-		convertFile(filemask);
-	}else{
-		std::vector<std::string> files;
-		fileList(files, filemask);
-		for(std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
-			convertFile(*it);
-	}
-}
-
-
 void printOption()
 {
-	puts(
+	std::clog << 
 #ifdef _DEBUG
 	"DEBUG "
 #endif
-	"resizeobj ver 1.1.0 beta by wa\n\n"
+	"resizeobj ver 1.2.0 beta by wa\n\n"
 	"resizeobj [オプション...] 対象ファイルマスク...\n"
 	"オプション:\n\n"
-	" -A=《0～100》画像縮小時のアンチエイリアス量\n"
+	" -A=(0...100) 画像縮小時のアンチエイリアス量\n"
 	"                0: アンチエイリアス無し\n"
 	"              100: アンチエイリアス強め(既定値)\n"
-	" -S=《0～2》  画像縮小時の特殊色(発光色・プレイヤー色)の扱い\n"
+	" -S=(0...2)   画像縮小時の特殊色(発光色・プレイヤー色)の扱い\n"
 	"                0: 特殊色を使用せず縮小し、昼間の見た目を優先する\n"
 	"                1: 縮小元エリアの左上が特殊色の場合はそれを出力(既定値)\n"
 	"                2: 縮小元エリアで特殊色が半数以上使用されている場合はそれを出力\n"
+	" -W=(16...255) 画像変換後のタイルサイズを指定する。既定値は「64」"
 	"\n"
 	" -K           原寸モード\n"
 	" -KA          原寸モードで建築物を変換する際にアニメーションを取り除く\n"
-	" -L           原寸モードで乗り物を変換する際にlength属性を変換しない\n"
 	"\n"
-	" -E=《拡張子》出力するファイルの拡張子。既定値は「.64.pak」\n"
-	" -T=《text》  アドオン名の先頭に指定されたtextを追加する\n"
+	" -E=(ext)     出力するファイルの拡張子。既定値は「.64.pak」\n"
+	" -T=(text)    アドオン名の先頭に指定されたtextを追加する\n"
 	" -N           ファイルヘッダの書き換えを行わない\n"
 	"\n"
 	" -D           エラー時にダイアログを表示しない\n"
-	" -? , -H      この画面を出力する\n"
-	"");
+	" -? , -H      この画面を出力する"
+	<< std::endl;
 }
 
 template<class T> T optToEnum(const std::string &text, int high, const char *opt)
@@ -233,7 +234,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 #endif
 
-	bool showErrorDialog = true;
+	bool isShowErrorDialog = true;
 
 	try
 	{
@@ -242,53 +243,66 @@ int _tmain(int argc, _TCHAR* argv[])
 		ResizeObj ro;
 		ro.antialias(100);
 		ro.headerRewriting(true);
-		ro.lengthMode(STRICT_CONVERT_LENGTH);
 		ro.specialColorMode(scmTOPLEFT);
 		ro.addonPrefix("");
 		ro.keepImageSize(false);
 		ro.newExtension(".64.pak");
 		ro.tileNoAnimation(false);
 
-		std::vector<std::string> args;
+		std::vector<std::string> files;
 		for(int i=1; i<argc; i++)
 		{
 			std::string key, val;
 			parseArg(argv[i], key, val);
-			if(key==""){ args.push_back(val);}
+			if(key==""){
+				if (val.find_first_of("*?")==std::string::npos)
+					files.push_back(val);
+				else
+					fileList(files, val);
+			}
 			else if(key=="K"){ ro.keepImageSize(true); }
 			else if(key=="KA"){ ro.tileNoAnimation(true); }
 			else if(key=="A"){ ro.antialias(optToEnum<int>(val, 100, "A"));}
 			else if(key=="S"){ ro.specialColorMode(optToEnum<SCConvMode>(val, 2, "S")); }
+			else if(key=="W"){
+				int ts = optToEnum<int>(val, 255, "W");
+				if(ts%8 != 0) throw std::runtime_error("タイルサイズは8の倍数に限ります。"); 
+				ro.newTileSize(ts);
+			}
 			else if(key=="N"){ ro.headerRewriting(false);    }
 			else if(key=="T"){ ro.addonPrefix(val);        }
-			else if(key=="L"){ ro.lengthMode(NO_CONVERT_LENGTH); }
 			else if(key=="E"){ if(val!="") ro.newExtension(val); }
-			else if(key=="D"){ showErrorDialog = false; }
+			else if(key=="D"){ isShowErrorDialog = false; }
 			else if(key=="H" || key=="?")
 			{
 				printOption();
 				return 0;
 			}
 			else{
-				printf("無効なスイッチです : \"%s\"\n\n", key.c_str());
+				std::clog << "無効なオプションです : " << key << std::endl;
 				printOption();
 				return 1;
 			}
 		}
-		if(args.empty())
+		if(files.empty())
 		{
 			printOption();
 			return 0;
 		}
 
-		for(std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
-			ro.convertFilemask(*it);
+		for(std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+		{
+			if(*it == "con")
+				ro.convertStdIO();
+			else
+				ro.convertFile(*it);
+		}
 
 	}catch(const std::exception &e)
 	{
-		printf("\nエラー: %s\n", e.what());
-		if(showErrorDialog)
-			MessageBox(0, e.what(), "エラー", MB_OK | MB_APPLMODAL | MB_ICONERROR);
+		std::cerr << "Error : " << e.what() << std::endl;
+		if(isShowErrorDialog)
+			showErrorDialog(e.what(), "Error");
 		return 1;
 	}		
 	return 0;

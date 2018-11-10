@@ -40,12 +40,16 @@ public:
 
 		return *pointer_cast<T*>(m_ptr + m_stride*y + x*sizeof(T));
 	}
+	T pixel(int x, int y) const{
+		VALIDATE_POS(this, x,y);
+		return *pointer_cast<const T*>(m_ptr + m_stride*y + x*sizeof(T));
+	}
 	int width() const{ return m_width; };
 	int height() const{ return m_height; };
 	int stride() const{ return m_stride; };
 
-	bool checkPointBounds(int x, int y){ return 0<=x && x<=m_width && 0<=y && y<=m_height; }
-	bool checkPoint(int x, int y){ return 0<=x && x<m_width && 0<=y && y<m_height; }
+	bool checkPointBounds(int x, int y) const{ return 0<=x && x<=m_width && 0<=y && y<=m_height; }
+	bool checkPoint(int x, int y) const{ return 0<=x && x<m_width && 0<=y && y<m_height; }
 
 	void clear(T color)
 	{

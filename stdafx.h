@@ -12,10 +12,6 @@
 #include <crtdbg.h>
 #endif
 
-
-#define NOMINMAX
-#include <windows.h>
-
 #include <stdio.h>
 #include <tchar.h>
 
