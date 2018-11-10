@@ -165,7 +165,7 @@ void TileConverter::convertBuil(PakNode *node) const
 	utyp ut;
 
 	// ヘッダから必要な値を取ってくるとともにDimsを変換
-	switch(GetPakNodeVer(header->ver1_5.version))
+	switch(GetPakNodeVer(header->ver1_6.version))
 	{
 	case 0:
 		ut = static_cast<utyp>(header->ver0.utype);
@@ -180,12 +180,13 @@ void TileConverter::convertBuil(PakNode *node) const
 	case 3:
 	case 4:
 	case 5:
-		ut = static_cast<utyp>(header->ver1_5.utype);
-		x = header->ver1_5.x;
-		y = header->ver1_5.y;
-		layouts = header->ver1_5.layouts;
-		header->ver1_5.x = x*2;
-		header->ver1_5.y = y*2;
+	case 6:
+		ut = static_cast<utyp>(header->ver1_6.utype);
+		x = header->ver1_6.x;
+		y = header->ver1_6.y;
+		layouts = header->ver1_6.layouts;
+		header->ver1_6.x = x*2;
+		header->ver1_6.y = y*2;
 		break;
 	default:
 		throw std::runtime_error(TILECONV_ERROR_UNSUPPORTED_VERSION);

@@ -81,7 +81,7 @@ union PakBuilding
 		unsigned short y;
 		unsigned char layouts;
 		// ....
-	} ver1_5;
+	} ver1_6;
 
 };
 

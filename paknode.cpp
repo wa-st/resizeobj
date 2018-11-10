@@ -7,6 +7,7 @@ const unsigned short LARGE_RECORD_SIZE = 0xFFFFu;
 template<class T> inline void readbin(std::istream &s, T&v)
 {
 	s.read(pointer_cast<char*>(&v), sizeof(T));
+	if(s.fail()) throw std::runtime_error("read error");
 }
 
 template<class T> inline T readnum(std::istream &s)
