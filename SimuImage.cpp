@@ -79,12 +79,12 @@ void unpackColorChannels(PIXVAL col, RGBA &result)
 		{
 			col -= 0x8020 + 31 * 31;
 			int a5 = 30 - (col % 31);
-			col /= 3;
+			col /= 31;
 			int r3 = (col >> 7) & 0x07;
 			int g4 = (col >> 3) & 0x0F;
 			int b3 = col & 0x07;
 
-			int a8 = (a5 << 3) | (a5 >> 3);
+			int a8 = a5 << 3;
 			if (a8 == 0) a8 = 1;
 
 			result.alpha = a8;
@@ -99,9 +99,9 @@ void unpackColorChannels(PIXVAL col, RGBA &result)
 			int a5 = 30 - (col % 31);
 			unpackColorChannels(rgbtable[col / 31], result);
 
-			int a8 = (a5 << 3) | (a5 >> 3);
+			int a8 = a5 << 3;
 			if (a8 == 0) a8 = 1;
-			result.alpha = (a5 << 3) | (a5 >> 3);
+			result.alpha = a8;
 			break;
 		}
 	}
@@ -109,9 +109,9 @@ void unpackColorChannels(PIXVAL col, RGBA &result)
 
 PIXVAL packColorChannels(RGBA &channels)
 {
-	if (channels.alpha < 255)
+	if (channels.alpha < ALPHA_THRESHOLD)
 	{
-		int pix = ((channels.red << 2) & 0x0380) | ((channels.green << 1) & 0x0078) | ((channels.blue >> 5) & 0x07);
+		int pix = ((channels.red << 2) & 0x0380) | ((channels.green >> 1) & 0x0078) | ((channels.blue >> 5) & 0x07);
 		int alpha = 30 - channels.alpha / 8;
 		return 0x8020 + 31 * 31 + pix * 31 + alpha;
 	}
