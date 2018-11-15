@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "TileConverter.h"
-#include "VhclConverter.h"
 
 const char *TILECONV_ERROR_UNSUPPORTED_VERSION = "原寸大モードが対応していないバージョンのPAKファイルです";
 const char *TILECONV_ERROR_UNSUPPORTED_TYPE    = "原寸大モードが対応していない形式のPAKファイルです";

@@ -97,7 +97,6 @@
     </ClCompile>
     <ClCompile Include="TileConverter.cpp" />
     <ClCompile Include="utils.cpp" />
-    <ClCompile Include="VhclConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmap.h" />
@@ -109,7 +108,6 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TileConverter.h" />
     <ClInclude Include="utils.h" />
-    <ClInclude Include="VhclConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

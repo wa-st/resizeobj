@@ -10,7 +10,6 @@
 #include "paknode.h"
 #include "ImgConverter.h"
 #include "ImgUpscaleConverter.h"
-#include "VhclConverter.h"
 #include "TileConverter.h"
 
 const char *RESIZEOBJ_SIGNATURE = "/resizeobj";
@@ -27,7 +26,6 @@ class ResizeObj
 private:
 	ImgConverter m_ic;
 	ImgUpscaleConverter m_iuc;
-	VhclConverter m_vc;
 	TileConverter m_tc;
 	std::string m_addonPrefix;
 	bool m_headerRewriting;
@@ -130,11 +128,7 @@ void ResizeObj::convertAddon(PakNode *addon) const
 	switch(m_convertMode)
 	{
 	  case cmSplit:
-		if(addon->type() == "VHCL")
-		{
-			m_vc.convertVhclAddon(addon, m_ic.newTileSize());
-		}
-		else if(addon->type() == "SMOK")
+		if(addon->type() == "SMOK")
 		{
 			m_tc.convertAddon(addon);
 		}
