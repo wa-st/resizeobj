@@ -182,6 +182,8 @@ void TileConverter::convertBuil(PakNode *node) const
 	case 5:
 	case 6:
 	case 7:
+	case 8:
+	case 9:
 		ut = static_cast<utyp>(header->ver1_9.utype);
 		x = header->ver1_9.x;
 		y = header->ver1_9.y;
