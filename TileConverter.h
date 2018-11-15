@@ -22,10 +22,10 @@ protected:
 	void convertSmokeTreeImage(PakNode *node) const;
 public:
 	// アニメーションを無効化する
-	void setNoAnimation(bool val){ m_noAnimation = val; };
-	bool noAnimation(){return m_noAnimation; }
+	void setNoAnimation(bool val) { m_noAnimation = val; };
+	bool noAnimation() { return m_noAnimation; }
 	// カーソル画像・フィールド縮小用
-	void imgConverter(ImgConverter *ic){ m_ic = ic; };
+	void imgConverter(ImgConverter *ic) { m_ic = ic; };
 
 	// アドオンを変換する
 	void convertAddon(PakNode *node) const { convertNodeTree(node); };

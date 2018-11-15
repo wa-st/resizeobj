@@ -19,11 +19,11 @@ inline T pointer_cast(const void* p)
 /*
   エラーチェック付きのポインタのdynamic_cast
 */
-template<class T, class U> 
+template<class T, class U>
 inline T object_cast(U* o)
 {
 	T v = dynamic_cast<T>(o);
-	if(!v && o) throw std::bad_cast();
+	if (!v && o) throw std::bad_cast();
 	return v;
 }
 

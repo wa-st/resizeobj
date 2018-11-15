@@ -4,7 +4,7 @@
 
 bool ImgUpscaleConverter::convertNodeTree(PakNode *node) const
 {
-	if(node->type() == "IMG")
+	if (node->type() == "IMG")
 	{
 		convertImage(node);
 		return true;
@@ -12,7 +12,7 @@ bool ImgUpscaleConverter::convertNodeTree(PakNode *node) const
 	else
 	{
 		bool result = false;
-		for(PakNode::iterator it = node->begin(); it != node->end(); it++)
+		for (PakNode::iterator it = node->begin(); it != node->end(); it++)
 			result = convertNodeTree(*it) || result;
 		return result;
 	}
@@ -24,13 +24,15 @@ void ImgUpscaleConverter::convertImage(PakNode *node) const
 	SimuImage image;
 	image.load(*node->data());
 
-	if(image.data.size() > 0)
+	if (image.data.size() > 0)
 	{
-		if(image.zoomable)
+		if (image.zoomable)
 		{
 			upscaleImage(image);
 			image.save(*node->data());
-		}else{
+		}
+		else
+		{
 			if (addImageMargin(image))
 				image.save(*node->data());
 		}
@@ -40,7 +42,7 @@ void ImgUpscaleConverter::convertImage(PakNode *node) const
 bool ImgUpscaleConverter::addImageMargin(SimuImage &image) const
 {
 	// IMG ver2以降では右余白を記録しなくなったので、変換の必要性なし。
-	if(image.version >= 2)
+	if (image.version >= 2)
 		return false;
 
 	int x, y, w, h;
@@ -63,10 +65,10 @@ void ImgUpscaleConverter::upscaleImage(SimuImage &data) const
 	MemoryBitmap<PIXVAL> bmp128(w * 2, h * 2);
 	bmp64.clear(SIMU_TRANSPARENT);
 	data.drawTo(0, 0, bmp64);
-	
-	for(int iy = 0; iy < bmp64.height(); ++iy)
+
+	for (int iy = 0; iy < bmp64.height(); ++iy)
 	{
-		for(int ix = 0; ix < bmp64.width(); ++ix)
+		for (int ix = 0; ix < bmp64.width(); ++ix)
 		{
 			PIXVAL col = bmp64.pixel(ix, iy);
 			bmp128.pixel(ix * 2    , iy * 2    ) = col;

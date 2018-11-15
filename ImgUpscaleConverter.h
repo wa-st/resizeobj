@@ -8,7 +8,7 @@
 class ImgUpscaleConverter
 {
 public:
-	void convertAddon(PakNode *node) const{convertNodeTree(node); };
+	void convertAddon(PakNode *node) const { convertNodeTree(node); };
 
 private:
 	bool convertNodeTree(PakNode *node) const;

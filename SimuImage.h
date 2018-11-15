@@ -5,7 +5,8 @@
 
 typedef unsigned short PIXVAL;
 
-enum PIXVAL_TYPE {
+enum PIXVAL_TYPE
+{
 	PVT_TRANSPARENT,
 	PVT_OPAQUE_COLOR,
 	PVT_ALPHA_COLOR,
@@ -26,7 +27,8 @@ const int ALPHA_THRESHOLD = 0xF8;
 // 00000000RRRRRrrrGGGGGgggBBBBBbbb Ë 0RRRRRGGGGGGBBBBBB
 #define To555(col) ((PIXVAL)(col >> 3) & SIMU_BLUEMASK | (PIXVAL)(col >> 6) & SIMU_GREENMASK |(PIXVAL)(col >> 9) & SIMU_REDMASK)
 
-struct RGBA {
+struct RGBA
+{
 	int red;
 	int green;
 	int blue;
@@ -43,10 +45,12 @@ inline PIXVAL_TYPE GetColorType(PIXVAL col)
 	{
 		return PVT_TRANSPARENT;
 	}
-	else if (col < 0x8020) {
+	else if (col < 0x8020)
+	{
 		return PVT_OPAQUE_SPECIAL_COLOR;
 	}
-	else if (col < 0x8020 + 31 * 31) {
+	else if (col < 0x8020 + 31 * 31)
+	{
 		return PVI_ALPHA_SPECIAL_COLOR;
 	}
 	else
@@ -55,19 +59,22 @@ inline PIXVAL_TYPE GetColorType(PIXVAL col)
 	}
 }
 
-inline bool isSpecialColor(PIXVAL col) {
+inline bool isSpecialColor(PIXVAL col)
+{
 	PIXVAL_TYPE type = GetColorType(col);
 	return (type == PVT_OPAQUE_SPECIAL_COLOR) || (type == PVI_ALPHA_SPECIAL_COLOR);
 }
 
-inline bool isAlphaColor(PIXVAL col) {
+inline bool isAlphaColor(PIXVAL col)
+{
 	PIXVAL_TYPE type = GetColorType(col);
 	return (type == PVT_ALPHA_COLOR) || (type == PVI_ALPHA_SPECIAL_COLOR);
 }
 
 inline int getSpecialColorIndex(PIXVAL col)
 {
-	switch (GetColorType(col)) {
+	switch (GetColorType(col))
+	{
 	case PVT_OPAQUE_SPECIAL_COLOR:
 		return col & 0x7FFF;
 	case PVI_ALPHA_SPECIAL_COLOR:
