@@ -109,7 +109,11 @@ void unpackColorChannels(PIXVAL col, RGBA &result)
 
 PIXVAL packColorChannels(RGBA &channels)
 {
-	if (channels.alpha < ALPHA_THRESHOLD)
+	if (channels.alpha == 0)
+	{
+		return SIMU_TRANSPARENT;
+	}
+	else if (channels.alpha < ALPHA_THRESHOLD)
 	{
 		int pix = ((channels.red << 2) & 0x0380) | ((channels.green >> 1) & 0x0078) | ((channels.blue >> 5) & 0x07);
 		int alpha = 30 - channels.alpha / 8;
