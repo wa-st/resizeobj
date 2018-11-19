@@ -2,7 +2,7 @@
 
 #include "paknode.h"
 #include "SimuImage.h"
-#include "ImgConverter.h"
+#include "ShrinkConverter.h"
 
 class TileConverter
 {

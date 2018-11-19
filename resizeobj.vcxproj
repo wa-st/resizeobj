@@ -86,8 +86,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ImgConverter.cpp" />
-    <ClCompile Include="ImgUpscaleConverter.cpp" />
+    <ClCompile Include="ShrinkConverter.cpp" />
+    <ClCompile Include="EnlargeConverter.cpp" />
     <ClCompile Include="paknode.cpp" />
     <ClCompile Include="resizeobj.cpp" />
     <ClCompile Include="SimuImage.cpp" />
@@ -100,8 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmap.h" />
-    <ClInclude Include="ImgConverter.h" />
-    <ClInclude Include="ImgUpscaleConverter.h" />
+    <ClInclude Include="ShrinkConverter.h" />
+    <ClInclude Include="EnlargeConverter.h" />
     <ClInclude Include="paknode.h" />
     <ClInclude Include="SimuImage.h" />
     <ClInclude Include="stdafx.h" />

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ImgConverter.h"
+#include "ShrinkConverter.h"
 #include "utils.h"
 
 bool ImgConverter::convertNodeTree(PakNode *node) const

@@ -8,8 +8,8 @@
 
 #include "utils.h"
 #include "paknode.h"
-#include "ImgConverter.h"
-#include "ImgUpscaleConverter.h"
+#include "ShrinkConverter.h"
+#include "EnlargeConverter.h"
 #include "TileConverter.h"
 
 const char *RESIZEOBJ_SIGNATURE = "/resizeobj";
