@@ -180,15 +180,8 @@ void ResizeObj::convertFile(std::string filename) const
 {
 	std::clog << filename << std::endl;
 
-
 	PakFile pak;
 	pak.loadFromFile(filename);
-
-	if (pak.signature().find(RESIZEOBJ_SIGNATURE) != std::string::npos)
-	{
-		std::clog << "    skipped." << std::endl;
-		return;
-	}
 
 	convertPak(pak);
 
