@@ -115,7 +115,7 @@ public:
 };
 
 /// ビトマップの上下左右の余白を計算する。
-/// 全て透過色なら、top=left=0,botom=height, right=width
+/// 全て透過色なら、top=left=0, bottom=height, right=width
 void getBitmapMargin(const Bitmap<PIXVAL> &bmp, int &top, int &bottom, int &left, int &right);
 /// 画像データから左右の余白幅を計算する
 void getImageColumnMargin(int height, std::vector<PIXVAL>::const_iterator it, int &left, int &right);

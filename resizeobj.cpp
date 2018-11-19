@@ -17,17 +17,17 @@ const char *RESIZEOBJ_SIGNATURE = "/resizeobj";
 enum ConvertMode
 {
 	cmNoConvert,
-	cmDownscale,
-	cmUpscale,
-	cmSplit,
+	cmShrink,
+	cmEnlarge,
+	cmTile,
 };
 
 class ResizeObj
 {
 private:
-	ImgConverter m_ic;
-	ImgUpscaleConverter m_iuc;
-	TileConverter m_tc;
+	ShrinkConverter m_shrinkConverter;
+	EnlargeConverter m_enlargeConverter;
+	TileConverter m_tileConverter;
 	std::string m_addonPrefix;
 	bool m_headerRewriting;
 	ConvertMode m_convertMode;
@@ -40,14 +40,14 @@ public:
 	void convertStdIO() const;
 	void convertFile(std::string filename) const;
 
-	void setAntialias(int val) { m_ic.setAlpha(val); };
+	void setAntialiasing(int val) { m_shrinkConverter.setAlpha(val); };
 	void setAddonPrefix(std::string val) { m_addonPrefix = val; };
 	void setNewExtension(std::string val) { m_newExt = val; };
 	void setHeaderRewriting(bool val) { m_headerRewriting = val; };
 	void setConvertMode(ConvertMode val) { m_convertMode = val; };
-	void setSpecialColorMode(SCConvMode val) { m_ic.setSpecialColorMode(val); };
-	void setTileNoAnimation(bool val) { m_tc.setNoAnimation(val); };
-	void setNewTileSize(int val) { m_ic.setNewTileSize(val); };
+	void setSpecialColorMode(SCConvMode val) { m_shrinkConverter.setSpecialColorMode(val); };
+	void setTileNoAnimation(bool val) { m_tileConverter.setNoAnimation(val); };
+	void setNewTileSize(int val) { m_shrinkConverter.setNewTileSize(val); };
 };
 
 /// アドオン名変更処理の対象外とする形式一覧.
@@ -68,7 +68,7 @@ bool isRenameNode(const char *name)
 }
 
 /**
-	アドオン名の先頭にposfixを追加する.
+	アドオン名の先頭にprefixを追加する.
 
 	アドオン名定義用のTEXTノードとアドン参照用のXREFノードの先頭にprefixを追加する。
 書籍:
@@ -119,7 +119,7 @@ std::string getAddonName(PakNode *node)
 
 ResizeObj::ResizeObj()
 {
-	m_tc.imgConverter(&m_ic);
+	m_tileConverter.setShrinkConverter(&m_shrinkConverter);
 }
 
 void ResizeObj::convertAddon(PakNode *addon) const
@@ -128,24 +128,24 @@ void ResizeObj::convertAddon(PakNode *addon) const
 
 	switch (m_convertMode)
 	{
-	case cmSplit:
+	case cmTile:
 		if (addon->type() == "SMOK")
 		{
-			m_tc.convertAddon(addon);
+			m_tileConverter.convertAddon(addon);
 		}
 		else if (addon->type() == "BUIL" || addon->type() == "FACT"
 			|| addon->type() == "FIEL")
 		{
-			m_tc.convertAddon(addon);
+			m_tileConverter.convertAddon(addon);
 		}
 		break;
 
-	case cmDownscale:
-		m_ic.convertAddon(addon);
+	case cmShrink:
+		m_shrinkConverter.convertAddon(addon);
 		break;
 
-	case cmUpscale:
-		m_iuc.convertAddon(addon);
+	case cmEnlarge:
+		m_enlargeConverter.convertAddon(addon);
 		break;
 	}
 
@@ -254,11 +254,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		//std::locale::global(std::locale(""));
 
 		ResizeObj ro;
-		ro.setAntialias(100);
+		ro.setAntialiasing(100);
 		ro.setHeaderRewriting(true);
 		ro.setSpecialColorMode(scmTOPLEFT);
 		ro.setAddonPrefix("");
-		ro.setConvertMode(cmDownscale);
+		ro.setConvertMode(cmShrink);
 		ro.setNewExtension(".64.pak");
 		ro.setTileNoAnimation(false);
 
@@ -276,11 +276,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else if (key == "K")
 			{
-				ro.setConvertMode(cmSplit);
+				ro.setConvertMode(cmTile);
 			}
 			else if (key == "X")
 			{
-				ro.setConvertMode(cmUpscale);
+				ro.setConvertMode(cmEnlarge);
 				ro.setNewExtension(".128.pak");
 			}
 			else if (key == "KA")
@@ -289,7 +289,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else if (key == "A")
 			{
-				ro.setAntialias(optToEnum<int>(val, 100, "A"));
+				ro.setAntialiasing(optToEnum<int>(val, 100, "A"));
 			}
 			else if (key == "S")
 			{

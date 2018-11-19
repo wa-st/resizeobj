@@ -2,7 +2,7 @@
 #include "EnlargeConverter.h"
 #include "utils.h"
 
-bool ImgUpscaleConverter::convertNodeTree(PakNode *node) const
+bool EnlargeConverter::convertNodeTree(PakNode *node) const
 {
 	if (node->type() == "IMG")
 	{
@@ -19,7 +19,7 @@ bool ImgUpscaleConverter::convertNodeTree(PakNode *node) const
 }
 
 
-void ImgUpscaleConverter::convertImage(PakNode *node) const
+void EnlargeConverter::convertImage(PakNode *node) const
 {
 	SimuImage image;
 	image.load(*node->data());
@@ -28,7 +28,7 @@ void ImgUpscaleConverter::convertImage(PakNode *node) const
 	{
 		if (image.zoomable)
 		{
-			upscaleImage(image);
+			enlargeImage(image);
 			image.save(*node->data());
 		}
 		else
@@ -39,7 +39,7 @@ void ImgUpscaleConverter::convertImage(PakNode *node) const
 	}
 }
 
-bool ImgUpscaleConverter::addImageMargin(SimuImage &image) const
+bool EnlargeConverter::addImageMargin(SimuImage &image) const
 {
 	// IMG ver2以降では右余白を記録しなくなったので、変換の必要性なし。
 	if (image.version >= 2)
@@ -55,7 +55,7 @@ bool ImgUpscaleConverter::addImageMargin(SimuImage &image) const
 	return true;
 }
 
-void ImgUpscaleConverter::upscaleImage(SimuImage &data) const
+void EnlargeConverter::enlargeImage(SimuImage &data) const
 {
 	int x, y, w, h;
 	data.getBounds(x, y, w, h);

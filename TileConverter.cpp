@@ -93,7 +93,7 @@ void TileConverter::convertNodeTree(PakNode *node) const
 	}
 	else if (node->type() == "FIEL")
 	{
-		m_ic->convertAddon(node);
+		m_shrinkConverter->convertAddon(node);
 	}
 	else if (node->type() == "SMOK")
 	{
@@ -137,8 +137,8 @@ void TileConverter::convertSmokeTreeImage(PakNode *node) const
 		SimuImage image;
 		image.load(*node->data());
 
-		image.x -= m_ic->oldTileSize() / 4;
-		image.y -= m_ic->oldTileSize() / 4;
+		image.x -= m_shrinkConverter->oldTileSize() / 4;
+		image.y -= m_shrinkConverter->oldTileSize() / 4;
 		image.save(*node->data());
 	}
 	else
@@ -276,11 +276,11 @@ void TileConverter::convertBuil(PakNode *node) const
 	}
 
 	// カーソルの縮小・アイコン画像の刈り込み
-	assert(m_ic);
+	assert(m_shrinkConverter);
 	for (PakNode::iterator it = node->begin(); it != node->end(); it++)
 	{
 		PakNode *node = *it;
-		if (node->type() == "CURS") m_ic->convertAddon(node);
+		if (node->type() == "CURS") m_shrinkConverter->convertAddon(node);
 	}
 };
 
@@ -405,7 +405,7 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 	// 画像データをビットマップに展開する。
 	for (int i = 0; i < phasen; i++)
 	{
-		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(m_ic->oldTileSize() * 2, m_ic->oldTileSize() * (oldHeight + 1));
+		Bitmap<PIXVAL> *bmp = new MemoryBitmap<PIXVAL>(m_shrinkConverter->oldTileSize() * 2, m_shrinkConverter->oldTileSize() * (oldHeight + 1));
 		bitmaps.push_back(bmp);
 		bmp->clear(SIMU_TRANSPARENT);
 
@@ -416,9 +416,9 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 			SimuImage img;
 			img.load(*imgNode->data());
 
-			int imgx, imgy, imgw, imgh;
-			img.getBounds(imgx, imgy, imgw, imgh);
-			img.drawTo(imgx, imgy + (oldHeight - j) * m_ic->oldTileSize(), *bmp);
+			int imgX, imgY, imgWidth, imgHeight;
+			img.getBounds(imgX, imgY, imgWidth, imgHeight);
+			img.drawTo(imgX, imgY + (oldHeight - j) * m_shrinkConverter->oldTileSize(), *bmp);
 		}
 	}
 
@@ -445,8 +445,8 @@ void TileConverter::convertImg2(int x, int y, PakNode *img2s[], PakNode *srcImg2
 	　│　　□□□□　　│
 	　└────────┘
 	*/
-	const int E = m_ic->oldTileSize() / 8;
-	const int by = oldHeight*m_ic->oldTileSize();
+	const int E = m_shrinkConverter->oldTileSize() / 8;
+	const int by = oldHeight*m_shrinkConverter->oldTileSize();
 
 	encodeImg2(img2s[0], bitmaps, 2 * E, by + 2 * E, 1, 4 * E, 3 * E, version);
 	encodeImg2(img2s[3], bitmaps, 2 * E, by + 4 * E, 1, 4 * E, 4 * E, version);

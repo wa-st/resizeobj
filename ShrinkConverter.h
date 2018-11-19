@@ -11,12 +11,12 @@ enum SCConvMode
 	scmTWO,
 };
 
-class ImgConverter
+class ShrinkConverter
 {
 public:
 	static const int MAX_ALPHA = 100;
 
-	ImgConverter() : m_newTileSize(64) {};
+	ShrinkConverter() : m_newTileSize(64) {};
 	void convertAddon(PakNode *node) const { convertNodeTree(node); };
 
 	int alpha() const { return m_alpha; }

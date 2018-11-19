@@ -2,7 +2,7 @@
 #include "ShrinkConverter.h"
 #include "utils.h"
 
-bool ImgConverter::convertNodeTree(PakNode *node) const
+bool ShrinkConverter::convertNodeTree(PakNode *node) const
 {
 	bool result = false;
 
@@ -18,7 +18,7 @@ bool ImgConverter::convertNodeTree(PakNode *node) const
 	return result;
 }
 
-void ImgConverter::convertImage(PakNode *node) const
+void ShrinkConverter::convertImage(PakNode *node) const
 {
 	SimuImage image;
 	image.load(*node->data());
@@ -38,7 +38,7 @@ void ImgConverter::convertImage(PakNode *node) const
 	}
 }
 
-bool ImgConverter::cutImageMargin(SimuImage &image) const
+bool ShrinkConverter::cutImageMargin(SimuImage &image) const
 {
 	// IMG ver2以降では右余白を記録しなくなったので、変換の必要性なし。
 	if (image.version >= 2) return false;
@@ -67,7 +67,7 @@ bool ImgConverter::cutImageMargin(SimuImage &image) const
 	}
 }
 
-void ImgConverter::shrinkImage(SimuImage &data) const
+void ShrinkConverter::shrinkImage(SimuImage &data) const
 {
 	int offsetX128, offsetY128, srcImgWidth, srcImgHeight;
 	data.getBounds(offsetX128, offsetY128, srcImgWidth, srcImgHeight);
@@ -126,7 +126,7 @@ PIXVAL getModeSpecialColor(PIXVAL cols[])
 	return 0;
 }
 
-PIXVAL ImgConverter::mixOpaquePixels(PIXVAL cols[]) const
+PIXVAL ShrinkConverter::mixOpaquePixels(PIXVAL cols[]) const
 {
 	RGBA sum = { 0, 0, 0, 0 };
 	RGBA base;
@@ -172,7 +172,7 @@ PIXVAL ImgConverter::mixOpaquePixels(PIXVAL cols[]) const
 }
 
 
-PIXVAL ImgConverter::mixPixels(PIXVAL cols[]) const
+PIXVAL ShrinkConverter::mixPixels(PIXVAL cols[]) const
 {
 	if ((cols[0] == SIMU_TRANSPARENT) || (m_alpha == 0))
 	{
