@@ -142,6 +142,7 @@ void ResizeObj::convertAddon(PakNode *addon) const
 
 	default:
 		// ‰½‚à‚µ‚È‚¢
+		break;
 	}
 
 	if (m_addonPrefix.size())
@@ -153,7 +154,13 @@ void ResizeObj::convertAddon(PakNode *addon) const
 void ResizeObj::convertPak(PakFile &pak) const
 {
 	if (m_headerRewriting)
-		pak.setSignature(pak.signature() + RESIZEOBJ_SIGNATURE);
+	{
+		if (pak.signature().find(RESIZEOBJ_SIGNATURE) == std::string::npos)
+		{
+			pak.setSignature(pak.signature() + RESIZEOBJ_SIGNATURE);
+		}
+	}
+
 
 	PakNode &root = pak.root();
 	for (PakNode::iterator it = root.begin(); it != root.end(); it++)
