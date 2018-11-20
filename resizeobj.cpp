@@ -129,15 +129,7 @@ void ResizeObj::convertAddon(PakNode *addon) const
 	switch (m_convertMode)
 	{
 	case cmTile:
-		if (addon->type() == "SMOK")
-		{
-			m_tileConverter.convertAddon(addon);
-		}
-		else if (addon->type() == "BUIL" || addon->type() == "FACT"
-			|| addon->type() == "FIEL")
-		{
-			m_tileConverter.convertAddon(addon);
-		}
+		m_tileConverter.convertAddon(addon);
 		break;
 
 	case cmShrink:
@@ -147,6 +139,9 @@ void ResizeObj::convertAddon(PakNode *addon) const
 	case cmEnlarge:
 		m_enlargeConverter.convertAddon(addon);
 		break;
+
+	default:
+		// ‰½‚à‚µ‚È‚¢
 	}
 
 	if (m_addonPrefix.size())
