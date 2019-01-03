@@ -11,6 +11,7 @@
 #include "ShrinkConverter.h"
 #include "EnlargeConverter.h"
 #include "TileConverter.h"
+#include "ShiftConverter.h"
 
 const char *RESIZEOBJ_SIGNATURE = "/resizeobj";
 
@@ -20,6 +21,7 @@ enum ConvertMode
 	cmShrink,
 	cmEnlarge,
 	cmTile,
+	cmShift,
 };
 
 class ResizeObj
@@ -28,6 +30,8 @@ private:
 	ShrinkConverter m_shrinkConverter;
 	EnlargeConverter m_enlargeConverter;
 	TileConverter m_tileConverter;
+	ShiftConverter m_shiftConverter;
+
 	std::string m_addonPrefix;
 	bool m_headerRewriting;
 	ConvertMode m_convertMode;
@@ -48,6 +52,7 @@ public:
 	void setSpecialColorMode(SCConvMode val) { m_shrinkConverter.setSpecialColorMode(val); };
 	void setTileNoAnimation(bool val) { m_tileConverter.setNoAnimation(val); };
 	void setNewTileSize(int val) { m_shrinkConverter.setNewTileSize(val); };
+	void setShiftDy(int dy) { m_shiftConverter.setDy(dy); };
 };
 
 /// アドオン名変更処理の対象外とする形式一覧.
@@ -140,6 +145,10 @@ void ResizeObj::convertAddon(PakNode *addon) const
 		m_enlargeConverter.convertAddon(addon);
 		break;
 
+	case cmShift:
+		m_shiftConverter.convertAddon(addon);
+		break;
+
 	default:
 		// 何もしない
 		break;
@@ -215,6 +224,8 @@ void printOption()
 		"\n"
 		" -X           拡大モード\n"
 		"\n"
+		"-M=(offset)   縦移動モード。規定値は「4」\n"
+		"\n"
 		" -E=(ext)     出力するファイルの拡張子。既定値は「.64.pak」\n"
 		" -T=(text)    アドオン名の先頭に指定されたtextを追加する\n"
 		" -N           ファイルヘッダの書き換えを行わない\n"
@@ -224,13 +235,13 @@ void printOption()
 		<< std::endl;
 }
 
-template<class T> T optToEnum(const std::string &text, int high, const char *opt)
+template<class T> T optToEnum(const std::string &text, int min, int max, const char *opt)
 {
 	int value = atoi(text.c_str());
-	if (value < 0 || high < value)
+	if (value < min || max < value)
 	{
 		std::ostringstream os;
-		os << opt << "オプションの有効範囲は0～" << high << "です。: " << text;
+		os << opt << "オプションの有効範囲は" << min << "～" << max << "です。: " << text;
 		throw std::runtime_error(os.str());
 	}
 	return static_cast<T>(value);
@@ -284,17 +295,24 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else if (key == "A")
 			{
-				ro.setAntialiasing(optToEnum<int>(val, 100, "A"));
+				ro.setAntialiasing(optToEnum<int>(val, 0, 100, "A"));
 			}
 			else if (key == "S")
 			{
-				ro.setSpecialColorMode(optToEnum<SCConvMode>(val, 2, "S"));
+				ro.setSpecialColorMode(optToEnum<SCConvMode>(val, 0, 2, "S"));
 			}
 			else if (key == "W")
 			{
-				int ts = optToEnum<int>(val, 0xFFFF, "W");
+				int ts = optToEnum<int>(val, 0, 0xFFFF, "W");
 				if (ts % 8 != 0) throw std::runtime_error("タイルサイズは8の倍数に限ります。");
 				ro.setNewTileSize(ts);
+			}
+			else if (key == "M")
+			{
+				ro.setConvertMode(cmShift);
+				if(val != "")
+					ro.setShiftDy(optToEnum<int>(val, INT_MIN, INT_MAX, "M"));
+				ro.setNewExtension(".shifted.pak");
 			}
 			else if (key == "N")
 			{

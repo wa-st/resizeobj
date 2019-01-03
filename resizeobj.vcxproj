@@ -86,6 +86,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ShiftConverter.cpp" />
     <ClCompile Include="ShrinkConverter.cpp" />
     <ClCompile Include="EnlargeConverter.cpp" />
     <ClCompile Include="paknode.cpp" />
@@ -100,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmap.h" />
+    <ClInclude Include="ShiftConverter.h" />
     <ClInclude Include="ShrinkConverter.h" />
     <ClInclude Include="EnlargeConverter.h" />
     <ClInclude Include="paknode.h" />
