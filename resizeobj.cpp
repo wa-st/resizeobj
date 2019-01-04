@@ -207,7 +207,7 @@ void printOption()
 #ifdef _DEBUG
 		"DEBUG "
 #endif
-		"resizeobj ver 1.5.0 beta by wa\n\n"
+		"resizeobj ver 1.6.0 beta by wa\n\n"
 		"resizeobj [オプション...] 対象ファイルマスク...\n"
 		"オプション:\n\n"
 		" -A=(0...100) 画像縮小時のアンチエイリアス量\n"

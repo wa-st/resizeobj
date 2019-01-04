@@ -1,149 +1,133 @@
 ---------------------------------------------------------------------
-                                                           2012”N12ŒŽ
-       resizeobj ver 1.5
+       resizeobj ver 1.6
                                            by wa ( ttrawa@gmail.com )
-                                http://www.geocities.jp/wa_simutrans/
+                                             https://wa-st.github.io/
 ---------------------------------------------------------------------
 
-¡ ŠT—v
-  simutrans‚Ìpak128—p‚ÌPAKƒtƒ@ƒCƒ‹‚ðpak64‚Å‚à—˜—p‚Å‚«‚é‚æ‚¤‚É•ÏŠ·‚·‚é
-  ƒRƒ}ƒ“ƒhƒ‰ƒCƒ“ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚Å‚·B
+â–  æ¦‚è¦
+  resizeobjã¯simutransã®pak128ç”¨ã®PAKãƒ•ã‚¡ã‚¤ãƒ«ã‚’pak64ã§ã‚‚åˆ©ç”¨ã§ãã‚‹ã‚ˆã†ã«
+  å¤‰æ›ã™ã‚‹ã‚³ãƒžãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã§ã™ã€‚
 
     --------------------------------------------------------
-     “®ìŠÂ‹« F windows 7 Home Premium‚ÅŠm”F
-     ŠJ”­ŠÂ‹« F Microsoft Visual C++ 2010 Expression Edition
+     å‹•ä½œç’°å¢ƒ ï¼š windows 10ã§ç¢ºèª
+     é–‹ç™ºç’°å¢ƒ ï¼š Microsoft Visual Studio Community 2015
     --------------------------------------------------------
 
 
-¡ ƒCƒ“ƒXƒg[ƒ‹/ƒAƒ“ƒCƒ“ƒXƒg[ƒ‹
-  “Á•Ê‚È‘€ì‚Í•s—v‚Å‚·B
-  ƒŒƒWƒXƒgƒŠ‚Ö‚Ì‘‚«ž‚Ý“™‚Ís‚¢‚Ü‚¹‚ñB
+â–  ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«/ã‚¢ãƒ³ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«
+  ç‰¹åˆ¥ãªæ“ä½œã¯ä¸è¦ã§ã™ã€‚
+  ãƒ¬ã‚¸ã‚¹ãƒˆãƒªã¸ã®æ›¸ãè¾¼ã¿ç­‰ã¯è¡Œã„ã¾ã›ã‚“ã€‚
 
 
-¡ Žg‚¢•û
-  resizeobj.exe‚Ìƒtƒ‹ƒpƒX‚ðc:\work\resizeobj.exeA•ÏŠ·‚µ‚½‚¢PAKƒtƒ@ƒC
-  ƒ‹‚Ì–¼‘O‚ðbuilding.example1.pak‚¾‚Æ‚·‚é‚ÆAƒRƒ}ƒ“ƒhƒvƒƒ“ƒvƒgã‚ÅA
+â–  ä½¿ã„æ–¹
+  resizeobj.exeã®ãƒ•ãƒ«ãƒ‘ã‚¹ã‚’c:\work\resizeobj.exeã€å¤‰æ›ã—ãŸã„PAKãƒ•ã‚¡ã‚¤
+  ãƒ«ã®åå‰ã‚’building.example1.pakã ã¨ã™ã‚‹ã¨ã€ã‚³ãƒžãƒ³ãƒ‰ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆä¸Šã§ã€
   
   c:\......>c:\work\resizeobj.exe building.example1.pak
   
-  ‚Æ‘Å‚¿ž‚ß‚Îresizeobj‚ðŽÀs‚Å‚«‚Ü‚·BƒRƒ}ƒ“ƒhƒvƒƒ“ƒvƒg‚Å‚Ìì‹Æ‚ª
-  –Ê“|‚È‚çresizeobj.exe‚ÌƒAƒCƒRƒ“ã‚É•ÏŠ·‚µ‚½‚¢ƒtƒ@ƒCƒ‹(•¡”‰Â)‚ðƒhƒ‰ƒb
-  ƒO•ƒhƒƒbƒv‚µ‚ÄŽÀs‚·‚é‚Ì‚à‚ ‚è‚Å‚·B
+  ã¨æ‰“ã¡è¾¼ã‚ã°resizeobjã‚’å®Ÿè¡Œã§ãã¾ã™ã€‚ã‚³ãƒžãƒ³ãƒ‰ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆã§ã®ä½œæ¥­ãŒ
+  é¢å€’ãªã‚‰resizeobj.exeã®ã‚¢ã‚¤ã‚³ãƒ³ä¸Šã«å¤‰æ›ã—ãŸã„ãƒ•ã‚¡ã‚¤ãƒ«(è¤‡æ•°å¯)ã‚’ãƒ‰ãƒ©ãƒƒ
+  ã‚°ï¼†ãƒ‰ãƒ­ãƒƒãƒ—ã—ã¦å®Ÿè¡Œã™ã‚‹ã®ã‚‚ã‚ã‚Šã§ã™ã€‚
   
-  resizeobj.exe‚ðŽÀs‚·‚é‚ÆAbuilding.example1.pak‚ª‘¶Ý‚·‚é‚Ì‚Æ“¯‚¶
-  ƒtƒHƒ‹ƒ_‚Ébuilding.example1.64.pak‚Æ‚¢‚¤–¼‘O‚Ìƒtƒ@ƒCƒ‹‚ªì¬‚³‚ê‚Ü
-  ‚·B‚±‚ê‚ª•ÏŠ·‚³‚ê‚½ƒtƒ@ƒCƒ‹‚È‚Ì‚Å‚±‚ê‚ðsimutrans‚ÌpakƒtƒHƒ‹ƒ_‚É•ú
-  ‚èž‚ß‚ÎOK‚Å‚·B
+  resizeobj.exeã‚’å®Ÿè¡Œã™ã‚‹ã¨ã€building.example1.pakãŒå­˜åœ¨ã™ã‚‹ã®ã¨åŒã˜
+  ãƒ•ã‚©ãƒ«ãƒ€ã«building.example1.64.pakã¨ã„ã†åå‰ã®ãƒ•ã‚¡ã‚¤ãƒ«ãŒä½œæˆã•ã‚Œã¾
+  ã™ã€‚ã“ã‚ŒãŒå¤‰æ›ã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ãªã®ã§ã“ã‚Œã‚’simutransã®pakãƒ•ã‚©ãƒ«ãƒ€ã«æ”¾
+  ã‚Šè¾¼ã‚ã°OKã§ã™ã€‚
   
-  •¡”ƒtƒ@ƒCƒ‹‚ðˆê‹C‚É•ÏŠ·‚µ‚½‚¢ê‡‚Í‰º‚Ì‚æ‚¤‚ÉƒXƒy[ƒX‹æØ‚è‚ÅŽw’è
-  ‚µ‚½‚èƒƒCƒ‹ƒhƒJ[ƒh‚ð—˜—p‚µ‚½‚è‚Å‚«‚Ü‚·B
+  è¤‡æ•°ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¸€æ°—ã«å¤‰æ›ã—ãŸã„å ´åˆã¯ä¸‹ã®ã‚ˆã†ã«ã‚¹ãƒšãƒ¼ã‚¹åŒºåˆ‡ã‚Šã§æŒ‡å®š
+  ã—ãŸã‚Šãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰ã‚’åˆ©ç”¨ã—ãŸã‚Šã§ãã¾ã™ã€‚
   
   c:\......>c:\work\resizeobj.exe building.example1.pak building.example2.pak ......
   c:\......>c:\work\resizeobj.exe building.*.pak
   
 
-¡ ƒRƒ}ƒ“ƒhƒ‰ƒCƒ“ƒIƒvƒVƒ‡ƒ“
+â–  ã‚³ãƒžãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã‚ªãƒ—ã‚·ãƒ§ãƒ³
   -A=<0...100>
-    ‰æ‘œk¬Žž‚ÌƒAƒ“ƒ`ƒGƒCƒŠƒAƒX—Ê‚ðŽw’è‚µ‚Ü‚·Bw-A=0x‚ÅƒAƒ“ƒ`ƒGƒC
-    ƒŠƒAƒX–³‚µAw-A=100x‚ÅƒAƒ“ƒ`ƒGƒCƒŠƒAƒX‹­‚ß‚Æ‚È‚è‚Ü‚·B
+    ç”»åƒç¸®å°æ™‚ã®ã‚¢ãƒ³ãƒã‚¨ã‚¤ãƒªã‚¢ã‚¹é‡ã‚’æŒ‡å®šã—ã¾ã™ã€‚ã€Ž-A=0ã€ã§ã‚¢ãƒ³ãƒã‚¨ã‚¤
+    ãƒªã‚¢ã‚¹ç„¡ã—ã€ã€Ž-A=100ã€ã§ã‚¢ãƒ³ãƒã‚¨ã‚¤ãƒªã‚¢ã‚¹å¼·ã‚ã¨ãªã‚Šã¾ã™ã€‚
 
   -S=<0...2>
-    ‰æ‘œk¬Žž‚Ì“ÁŽêF(”­ŒõFEƒvƒŒƒCƒ„[F)‚Ìˆµ‚¢‚ðŽw’è‚µ‚Ü‚·B
-      0: “ÁŽêF‚ðŽg—p‚¹‚¸k¬‚µ‚Ü‚·B–éŠÔ‚É”­Œõ‚µ‚È‚­‚È‚é‚©‚í‚è‚ÉŠï—í
-         ‚ÈƒAƒ“ƒ`ƒGƒCƒŠƒAƒX‚ª‚©‚©‚è‚Ü‚·B
-      1: k¬Œ³ƒGƒŠƒA‚Ì¶ã‚ª“ÁŽêF‚Ìê‡‚É‚»‚Ì“ÁŽêF‚ðo—Í‚µ‚Ü‚·B
-         (Šù’è’l)
-      2: k¬Œ³ƒGƒŠƒA‚Å“ÁŽêF‚ª”¼”ˆÈãŽg—p‚³‚ê‚Ä‚¢‚éê‡‚É‚»‚Ì“ÁŽêF
-         ‚ðo—Í‚µ‚Ü‚·B
+    ç”»åƒç¸®å°æ™‚ã®ç‰¹æ®Šè‰²(ç™ºå…‰è‰²ãƒ»ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼è‰²)ã®æ‰±ã„ã‚’æŒ‡å®šã—ã¾ã™ã€‚
+      0: ç‰¹æ®Šè‰²ã‚’ä½¿ç”¨ã›ãšç¸®å°ã—ã¾ã™ã€‚å¤œé–“ã«ç™ºå…‰ã—ãªããªã‚‹ã‹ã‚ã‚Šã«å¥‡éº—
+         ãªã‚¢ãƒ³ãƒã‚¨ã‚¤ãƒªã‚¢ã‚¹ãŒã‹ã‹ã‚Šã¾ã™ã€‚
+      1: ç¸®å°å…ƒã‚¨ãƒªã‚¢ã®å·¦ä¸ŠãŒç‰¹æ®Šè‰²ã®å ´åˆã«ãã®ç‰¹æ®Šè‰²ã‚’å‡ºåŠ›ã—ã¾ã™ã€‚
+         (æ—¢å®šå€¤)
+      2: ç¸®å°å…ƒã‚¨ãƒªã‚¢ã§ç‰¹æ®Šè‰²ãŒåŠæ•°ä»¥ä¸Šä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹å ´åˆã«ãã®ç‰¹æ®Šè‰²
+         ã‚’å‡ºåŠ›ã—ã¾ã™ã€‚
 
-  -W  •ÏŠ·Œã‚ÌƒAƒhƒIƒ“‚Ìƒ^ƒCƒ‹ƒTƒCƒY‚ðŽw’è‚µ‚Ü‚·B‹K’è’l‚Íu64v‚Å‚·B
-      —á‚¦‚ÎAPak64‚©‚çPak32‚É•ÏŠ·‚·‚éÛ‚É‚Íu-W=32v‚ÆŽw’è‚µ‚Ü‚·B
+  -W  å¤‰æ›å¾Œã®ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¿ã‚¤ãƒ«ã‚µã‚¤ã‚ºã‚’æŒ‡å®šã—ã¾ã™ã€‚è¦å®šå€¤ã¯ã€Œ64ã€ã§ã™ã€‚
+      ä¾‹ãˆã°ã€Pak64ã‹ã‚‰Pak32ã«å¤‰æ›ã™ã‚‹éš›ã«ã¯ã€Œ-W=32ã€ã¨æŒ‡å®šã—ã¾ã™ã€‚
 
-  -K  Œ³ƒtƒ@ƒCƒ‹‚Ì‰æ‘œƒf[ƒ^‚ðk¬‚¹‚¸‚»‚Ì‚Ü‚Ü‘å‚«‚È‰æ‘œ‚ðŽg—p‚·‚é
-      uŒ´¡‘åƒ‚[ƒhv‚Å•ÏŠ·‚µ‚Ü‚·B
-        Œ´¡‘åƒ‚[ƒh‚ªŽg—p‚Å‚«‚é‚Ì‚ÍAˆê•”‚ÌŒš’z•¨(‰wŽÉE‘Ò‡Žº/‘qŒÉE
-      –ðŠE–{ŽÐEHêEƒ‰ƒ“ƒhƒ}[ƒN)‚Ì‚Ý‚Å‚·BŽs“àŒš’z•¨‚â
-      ‹L”O”è‚È‚Ç‚ÍŒ´¡‘åƒ‚[ƒh‚ð—˜—p‚Å‚«‚Ü‚¹‚ñB
+  -K  å…ƒãƒ•ã‚¡ã‚¤ãƒ«ã®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’ç¸®å°ã›ãšãã®ã¾ã¾å¤§ããªç”»åƒã‚’ä½¿ç”¨ã™ã‚‹
+      ã€ŒåŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ã€ã§å¤‰æ›ã—ã¾ã™ã€‚
+        åŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ãŒä½¿ç”¨ã§ãã‚‹ã®ã¯ã€ä¸€éƒ¨ã®å»ºç¯‰ç‰©(é§…èˆŽãƒ»å¾…åˆå®¤/å€‰åº«ãƒ»
+      å½¹æ‰€ãƒ»æœ¬ç¤¾ãƒ»å·¥å ´ãƒ»ãƒ©ãƒ³ãƒ‰ãƒžãƒ¼ã‚¯)ã®ã¿ã§ã™ã€‚å¸‚å†…å»ºç¯‰ç‰©ã‚„
+      è¨˜å¿µç¢‘ãªã©ã¯åŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ã‚’åˆ©ç”¨ã§ãã¾ã›ã‚“ã€‚
   -Ka
-      Œ´¡‘åƒ‚[ƒh‚ÅŒš’z•¨‚ð•ÏŠ·‚·‚éÛ‚ÉƒAƒjƒ[ƒVƒ‡ƒ“‚ðŽæ‚èœ‚«‚Ü‚·B
+      åŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ã§å»ºç¯‰ç‰©ã‚’å¤‰æ›ã™ã‚‹éš›ã«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å–ã‚Šé™¤ãã¾ã™ã€‚
 
   -X
-      pak64—p‚ÌƒAƒhƒIƒ“‚ðpak128‚ÅŽg—p‚·‚éuŠg‘åƒ‚[ƒhv‚Å•ÏŠ·‚µ‚Ü‚·B
-      pak64—p‚Ì‰æ‘œ‚ð–³—‚â‚è2”{‚ÉŠg‘å‚·‚é‚¾‚¯‚È‚Ì‚ÅAŒ©‚½–Ú‚Í”ñí‚Éˆ«‚­‚È‚è‚Ü‚·B
+      pak64ç”¨ã®ã‚¢ãƒ‰ã‚ªãƒ³ã‚’pak128ã§ä½¿ç”¨ã™ã‚‹ã€Œæ‹¡å¤§ãƒ¢ãƒ¼ãƒ‰ã€ã§å¤‰æ›ã—ã¾ã™ã€‚
+      pak64ç”¨ã®ç”»åƒã‚’ç„¡ç†ã‚„ã‚Š2å€ã«æ‹¡å¤§ã™ã‚‹ã ã‘ãªã®ã§ã€è¦‹ãŸç›®ã¯éžå¸¸ã«æ‚ªããªã‚Šã¾ã™ã€‚
+
+  -M=<OFFSET>
+      ã‚¢ãƒ‰ã‚ªãƒ³ã®ç”»åƒã‚’æŒ‡å®šã•ã‚ŒãŸãƒ”ã‚¯ã‚»ãƒ«æ•°ã ã‘ä¸‹ã«ãšã‚‰ã™ã€Œç¸¦ç§»å‹•ãƒ¢ãƒ¼ãƒ‰ã€ã§
+      å¤‰æ›ã—ã¾ã™ã€‚è¦å®šå€¤ã¯ã€Œ4ã€ã§ã™ã€‚
 
   -E=<EXTENSION>
-      o—Í‚·‚éƒtƒ@ƒCƒ‹‚ÌŠg’£Žq‚ðŽw’è‚µ‚Ü‚·BŠù’è’l‚Íu.64.pakv‚Å‚·B
+      å‡ºåŠ›ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­ã‚’æŒ‡å®šã—ã¾ã™ã€‚æ—¢å®šå€¤ã¯ã€Œ.64.pakã€ã§ã™ã€‚
   -T=<TEXT>
-      ƒAƒhƒIƒ“–¼‚Ìæ“ª‚ÉŽw’è‚³‚ê‚½•¶Žš—ñ‚ð•t‚¯‰Á‚¦‚Ü‚·BƒAƒhƒIƒ“–¼‚ª‘¼‚Ì
-      ƒAƒhƒIƒ“‚ÆÕ“Ë‚·‚éê‡‚È‚Ç‚É‚Ç‚¤‚¼B
+      ã‚¢ãƒ‰ã‚ªãƒ³åã®å…ˆé ­ã«æŒ‡å®šã•ã‚ŒãŸæ–‡å­—åˆ—ã‚’ä»˜ã‘åŠ ãˆã¾ã™ã€‚ã‚¢ãƒ‰ã‚ªãƒ³åãŒä»–ã®
+      ã‚¢ãƒ‰ã‚ªãƒ³ã¨è¡çªã™ã‚‹å ´åˆãªã©ã«ã©ã†ãžã€‚
   -N
-      ƒtƒ@ƒCƒ‹ƒwƒbƒ_‚Ì‘‚«Š·‚¦‚ðs‚¢‚Ü‚¹‚ñB
+      ãƒ•ã‚¡ã‚¤ãƒ«ãƒ˜ãƒƒãƒ€ã®æ›¸ãæ›ãˆã‚’è¡Œã„ã¾ã›ã‚“ã€‚
   -D
-      ƒGƒ‰[”­¶Žž‚Éƒ_ƒCƒAƒƒO‚ð•\Ž¦‚µ‚Ü‚¹‚ñB
+      ã‚¨ãƒ©ãƒ¼ç™ºç”Ÿæ™‚ã«ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã—ã¾ã›ã‚“ã€‚
   -? , -H
-      ƒRƒ}ƒ“ƒhƒ‰ƒCƒ“ƒIƒvƒVƒ‡ƒ“‚ð•\Ž¦‚µ‚Ü‚·B
+      ã‚³ãƒžãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’è¡¨ç¤ºã—ã¾ã™ã€‚
 
+â–  æ›´æ–°å±¥æ­´
 
-¡ ƒ‰ƒCƒZƒ“ƒX
-
-NYSL Version 0.9982‚É]‚¢‚Ü‚·B
-
-A. –{ƒ\ƒtƒgƒEƒFƒA‚Í Everyone'sWare ‚Å‚·B‚±‚Ìƒ\ƒtƒg‚ðŽè‚É‚µ‚½ˆêlˆêl‚ªA
-   ‚²Ž©•ª‚Ìì‚Á‚½‚à‚Ì‚ðˆµ‚¤‚Ì‚Æ“¯‚¶‚æ‚¤‚ÉAŽ©—R‚É—˜—p‚·‚é‚±‚Æ‚ªo—ˆ‚Ü‚·B
-
-  A-1. ƒtƒŠ[ƒEƒFƒA‚Å‚·BìŽÒ‚©‚ç‚ÍŽg—p—¿“™‚ð—v‹‚µ‚Ü‚¹‚ñB
-  A-2. —L—¿–³—¿‚â”}‘Ì‚Ì”@‰½‚ð–â‚í‚¸AŽ©—R‚É“]ÚEÄ”z•z‚Å‚«‚Ü‚·B
-  A-3. ‚¢‚©‚È‚éŽí—Þ‚Ì ‰ü•ÏE‘¼ƒvƒƒOƒ‰ƒ€‚Å‚Ì—˜—p‚ðs‚Á‚Ä‚à\‚¢‚Ü‚¹‚ñB
-  A-4. •ÏX‚µ‚½‚à‚Ì‚â•”•ª“I‚ÉŽg—p‚µ‚½‚à‚Ì‚ÍA‚ ‚È‚½‚Ì‚à‚Ì‚É‚È‚è‚Ü‚·B
-       ŒöŠJ‚·‚éê‡‚ÍA‚ ‚È‚½‚Ì–¼‘O‚Ì‰º‚Ås‚Á‚Ä‰º‚³‚¢B
-
-B. ‚±‚Ìƒ\ƒtƒg‚ð—˜—p‚·‚é‚±‚Æ‚É‚æ‚Á‚Ä¶‚¶‚½‘¹ŠQ“™‚É‚Â‚¢‚ÄAìŽÒ‚Í
-   Ó”C‚ð•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·BŠeŽ©‚ÌÓ”C‚É‚¨‚¢‚Ä‚²—˜—p‰º‚³‚¢B
-
-C. ’˜ìŽÒlŠiŒ ‚Íwa‚É‹A‘®‚µ‚Ü‚·B’˜ìŒ ‚Í•úŠü‚µ‚Ü‚·B
-
-D. ˆÈã‚Ì‚R€‚ÍAƒ\[ƒXEŽÀsƒoƒCƒiƒŠ‚Ì‘o•û‚É“K—p‚³‚ê‚Ü‚·B
-
-
-¡ XV—š—ð
-
-  Esimutrans 120.4ˆÈ~—p‚Ìmakeobj 60.2‚É‘Î‰ž
-  EŒ´¡‘åƒ‚[ƒh‚ÌŽÔ—¼•ÏŠ·‹@”\‚ðíœ
+ver 1.6
+  ãƒ»simutrans 120.4ä»¥é™ç”¨ã®makeobj 60.2ã«å¯¾å¿œ
+  ãƒ»åŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ã®è»Šä¸¡å¤‰æ›æ©Ÿèƒ½ã‚’å‰Šé™¤
+  ãƒ»ç¸¦ç§»å‹•ãƒ¢ãƒ¼ãƒ‰(-M)è¿½åŠ 
+  ãƒ»ã‚½ãƒ¼ã‚¹ã®æ•´ç†
 
 ver 1.5(2012/12)
-  Esimutrans 112.0ˆÈ~—p‚Ìmakeobj 55‚É‘Î‰ž
-  EuŒ´¡ƒ‚[ƒhv‚Ì–¼Ì‚ðuŒ´¡‘åƒ‚[ƒhv‚É•ÏX
-  Eƒ\[ƒX‚Ì®—
+  ãƒ»simutrans 112.0ä»¥é™ç”¨ã®makeobj 55ã«å¯¾å¿œ
+  ãƒ»ã€ŒåŽŸå¯¸ãƒ¢ãƒ¼ãƒ‰ã€ã®åç§°ã‚’ã€ŒåŽŸå¯¸å¤§ãƒ¢ãƒ¼ãƒ‰ã€ã«å¤‰æ›´
+  ãƒ»ã‚½ãƒ¼ã‚¹ã®æ•´ç†
 
 ver 1.4(2012/03/18)
-  Esimutrans 111.2ˆÈ~—p‚Ìmakeobj 53‚É‘Î‰ž
-  Eƒ‰ƒCƒZƒ“ƒX‚ðNYSL‚É•ÏX‚µ‚½
+  ãƒ»simutrans 111.2ä»¥é™ç”¨ã®makeobj 53ã«å¯¾å¿œ
+  ãƒ»ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã‚’NYSLã«å¤‰æ›´ã—ãŸ
 
 ver 1.3(2011/07/18)
-  EŠg‘åƒ‚[ƒh(-XƒIƒvƒVƒ‡ƒ“)’Ç‰Á
+  ãƒ»æ‹¡å¤§ãƒ¢ãƒ¼ãƒ‰(-Xã‚ªãƒ—ã‚·ãƒ§ãƒ³)è¿½åŠ 
 
 ver 1.2(2011/05/08)
-  Esimutrans 110ˆÈ~—pmakeobj51‚É‘Î‰ž
-  E-WƒIƒvƒVƒ‡ƒ“’Ç‰Á
-  E-LƒIƒvƒVƒ‡ƒ“íœ
-  EƒƒO‚Ìo—Í—Ê‚ðíŒ¸
-  EŒÃ‚¢Œ`Ž®‚Ì‰æ‘œƒf[ƒ^(IMG ver1)‚ðŠÜ‚Þæ‚è•¨‚ðŒ´¡ƒ‚[ƒh‚Å•ÏŠ·‚µ‚½ê‡AƒvƒŒƒCƒ„[ƒJƒ‰[‚ª‚¸‚ê‚é–â‘è‚ðC³
-  EŒ³‚©‚ç‰æ‘œ‚ªƒ}ƒCƒiƒXƒIƒtƒZƒbƒg‚³‚ê‚Ä‚¢‚éƒAƒhƒIƒ“‚ð³í‚É•ÏŠ·‚Å‚«‚È‚¢–â‘è‚ðC³
-  Euresizeobj conv‚Å•W€“üo—Í‚©‚çPAKƒtƒ@ƒCƒ‹‚ð“Ç‚Ý‘‚«‚Å‚«‚é‚æ‚¤‚É‚µ‚½B
-  EƒƒO‚Ìo—Íæ‚ð•W€o—Í‚©‚ç•W€ƒGƒ‰[‚É•ÏX
-  EŠJ”­ŠÂ‹«‚ðVC2008‚©‚çVC2010‚É•ÏX
+  ãƒ»simutrans 110ä»¥é™ç”¨makeobj51ã«å¯¾å¿œ
+  ãƒ»-Wã‚ªãƒ—ã‚·ãƒ§ãƒ³è¿½åŠ 
+  ãƒ»-Lã‚ªãƒ—ã‚·ãƒ§ãƒ³å‰Šé™¤
+  ãƒ»ãƒ­ã‚°ã®å‡ºåŠ›é‡ã‚’å‰Šæ¸›
+  ãƒ»å¤ã„å½¢å¼ã®ç”»åƒãƒ‡ãƒ¼ã‚¿(IMG ver1)ã‚’å«ã‚€ä¹—ã‚Šç‰©ã‚’åŽŸå¯¸ãƒ¢ãƒ¼ãƒ‰ã§å¤‰æ›ã—ãŸå ´åˆã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚«ãƒ©ãƒ¼ãŒãšã‚Œã‚‹å•é¡Œã‚’ä¿®æ­£
+  ãƒ»å…ƒã‹ã‚‰ç”»åƒãŒãƒžã‚¤ãƒŠã‚¹ã‚ªãƒ•ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’æ­£å¸¸ã«å¤‰æ›ã§ããªã„å•é¡Œã‚’ä¿®æ­£
+  ãƒ»ã€Œresizeobj conã€ã§æ¨™æº–å…¥å‡ºåŠ›ã‹ã‚‰PAKãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿æ›¸ãã§ãã‚‹ã‚ˆã†ã«ã—ãŸã€‚
+  ãƒ»ãƒ­ã‚°ã®å‡ºåŠ›å…ˆã‚’æ¨™æº–å‡ºåŠ›ã‹ã‚‰æ¨™æº–ã‚¨ãƒ©ãƒ¼ã«å¤‰æ›´
+  ãƒ»é–‹ç™ºç’°å¢ƒã‚’VC2008ã‹ã‚‰VC2010ã«å¤‰æ›´
 
 ver 1.1(2009/10/12)
-  EŒ´¡ƒ‚[ƒh’Ç‰Á
-  Eæ‚è•¨‚àƒfƒtƒHƒ‹ƒg‚Å‚Í‰æ‘œk¬‚ðs‚¤‚æ‚¤‚É‚µAƒIƒtƒZƒbƒg’²®‹@”\‚ÍŒ´¡ƒ‚[ƒh‚ÉˆÚ“®B
-  E-EƒIƒvƒVƒ‡ƒ“’Ç‰Á
-  E-DƒIƒvƒVƒ‡ƒ“’Ç‰Á
-  E•ÏŠ·Œ³ƒtƒ@ƒCƒ‹–¼‚É"."‚ðŠÜ‚Ü‚¸ƒtƒHƒ‹ƒ_–¼‚É"."‚ðŠÜ‚Þê‡‚Éo—Íƒtƒ@ƒCƒ‹–¼‚ª•Ï‚É‚È‚éƒoƒO‚ðC³
-  E”ñ‹ó”’‰æ‘œ‚ðk¬‚µ‚½Œ‹‰Ê ‹ó”’‰æ‘œ‚É“]‚¶‚½ê‡A•s³‚ÈPAKƒtƒ@ƒCƒ‹‚ªo—Í‚³‚ê‚éƒoƒO‚ðC³
+  ãƒ»åŽŸå¯¸ãƒ¢ãƒ¼ãƒ‰è¿½åŠ 
+  ãƒ»ä¹—ã‚Šç‰©ã‚‚ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§ã¯ç”»åƒç¸®å°ã‚’è¡Œã†ã‚ˆã†ã«ã—ã€ã‚ªãƒ•ã‚»ãƒƒãƒˆèª¿æ•´æ©Ÿèƒ½ã¯åŽŸå¯¸ãƒ¢ãƒ¼ãƒ‰ã«ç§»å‹•ã€‚
+  ãƒ»-Eã‚ªãƒ—ã‚·ãƒ§ãƒ³è¿½åŠ 
+  ãƒ»-Dã‚ªãƒ—ã‚·ãƒ§ãƒ³è¿½åŠ 
+  ãƒ»å¤‰æ›å…ƒãƒ•ã‚¡ã‚¤ãƒ«åã«"."ã‚’å«ã¾ãšãƒ•ã‚©ãƒ«ãƒ€åã«"."ã‚’å«ã‚€å ´åˆã«å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«åãŒå¤‰ã«ãªã‚‹ãƒã‚°ã‚’ä¿®æ­£
+  ãƒ»éžç©ºç™½ç”»åƒã‚’ç¸®å°ã—ãŸçµæžœ ç©ºç™½ç”»åƒã«è»¢ã˜ãŸå ´åˆã€ä¸æ­£ãªPAKãƒ•ã‚¡ã‚¤ãƒ«ãŒå‡ºåŠ›ã•ã‚Œã‚‹ãƒã‚°ã‚’ä¿®æ­£
 
 ver 0.2 beta (2009/7/21)
-  EPAKƒtƒ@ƒCƒ‹‚Ì–¼‘O‚É“ú–{Œê‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚ÆƒGƒ‰[‚ªo‚éƒoƒO‚ðC³
-  EƒGƒ‰[•\Ž¦‚ðƒRƒ“ƒ\[ƒ‹o—Í‚·‚é‚¾‚¯‚Å‚È‚­ƒGƒ‰[ƒ_ƒCƒAƒƒO‚Å‚Ì•\Ž¦‚às‚¤‚æ‚¤‚É•ÏX
+  ãƒ»PAKãƒ•ã‚¡ã‚¤ãƒ«ã®åå‰ã«æ—¥æœ¬èªžãŒå«ã¾ã‚Œã¦ã„ã‚‹ã¨ã‚¨ãƒ©ãƒ¼ãŒå‡ºã‚‹ãƒã‚°ã‚’ä¿®æ­£
+  ãƒ»ã‚¨ãƒ©ãƒ¼è¡¨ç¤ºã‚’ã‚³ãƒ³ã‚½ãƒ¼ãƒ«å‡ºåŠ›ã™ã‚‹ã ã‘ã§ãªãã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã§ã®è¡¨ç¤ºã‚‚è¡Œã†ã‚ˆã†ã«å¤‰æ›´
 
 ver 0.1 beta (2009/7/18)
-  E‰ŒöŠJ
+  ãƒ»åˆå…¬é–‹
