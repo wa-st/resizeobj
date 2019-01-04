@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -20,10 +20,12 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -84,8 +86,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ImgConverter.cpp" />
-    <ClCompile Include="ImgUpscaleConverter.cpp" />
+    <ClCompile Include="ShiftConverter.cpp" />
+    <ClCompile Include="ShrinkConverter.cpp" />
+    <ClCompile Include="EnlargeConverter.cpp" />
     <ClCompile Include="paknode.cpp" />
     <ClCompile Include="resizeobj.cpp" />
     <ClCompile Include="SimuImage.cpp" />
@@ -95,19 +98,18 @@
     </ClCompile>
     <ClCompile Include="TileConverter.cpp" />
     <ClCompile Include="utils.cpp" />
-    <ClCompile Include="VhclConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmap.h" />
-    <ClInclude Include="ImgConverter.h" />
-    <ClInclude Include="ImgUpscaleConverter.h" />
+    <ClInclude Include="ShiftConverter.h" />
+    <ClInclude Include="ShrinkConverter.h" />
+    <ClInclude Include="EnlargeConverter.h" />
     <ClInclude Include="paknode.h" />
     <ClInclude Include="SimuImage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TileConverter.h" />
     <ClInclude Include="utils.h" />
-    <ClInclude Include="VhclConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

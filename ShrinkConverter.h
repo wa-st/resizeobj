@@ -4,27 +4,28 @@
 #include "bitmap.h"
 #include "SimuImage.h"
 
-enum SCConvMode{
+enum SCConvMode
+{
 	scmNONE,
 	scmTOPLEFT,
 	scmTWO,
 };
 
-class ImgConverter
+class ShrinkConverter
 {
 public:
 	static const int MAX_ALPHA = 100;
 
-	ImgConverter(): m_newTileSize(64) {};
-	void convertAddon(PakNode *node) const{convertNodeTree(node); };
+	ShrinkConverter() : m_newTileSize(64) {};
+	void convertAddon(PakNode *node) const { convertNodeTree(node); };
 
-	int alpha() const{ return m_alpha; }
-	void setAlpha(int value){ m_alpha = value; }
-	int newTileSize() const{ return m_newTileSize; }
-	void setNewTileSize(int value){ m_newTileSize = value; }
-	int oldTileSize() const{ return m_newTileSize*2; }
-	SCConvMode specialColorMode() const{return m_specialColorMode; }
-	void setSpecialColorMode(SCConvMode value){ m_specialColorMode = value; }
+	int alpha() const { return m_alpha; }
+	void setAlpha(int value) { m_alpha = value; }
+	int newTileSize() const { return m_newTileSize; }
+	void setNewTileSize(int value) { m_newTileSize = value; }
+	int oldTileSize() const { return m_newTileSize * 2; }
+	SCConvMode specialColorMode() const { return m_specialColorMode; }
+	void setSpecialColorMode(SCConvMode value) { m_specialColorMode = value; }
 private:
 	int m_alpha;
 	int m_newTileSize;
@@ -39,8 +40,8 @@ private:
 	/// 右・下にTileSize/2以上余白がある場合はその余白を切り捨ててタイルサイズを半減する。
 	/// おもにアイコン画像用
 	bool cutImageMargin(SimuImage &image) const;
-	/// 産業施設の煙の位置を調整する……筈だった
-	void convertFactorySmoke(PakNode *node) const;
+	// 4ピクセルを混合した1ピクセルを計算する
+	PIXVAL mixOpaquePixels(PIXVAL cols[]) const;
 	/// 4ピクセルを混合した1ピクセルを計算する
-	PIXVAL mixPixel(PIXVAL cols[]) const;
+	PIXVAL mixPixels(PIXVAL cols[]) const;
 };

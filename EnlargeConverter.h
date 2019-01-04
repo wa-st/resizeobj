@@ -5,14 +5,14 @@
 #include "bitmap.h"
 #include "SimuImage.h"
 
-class ImgUpscaleConverter
+class EnlargeConverter
 {
 public:
-	void convertAddon(PakNode *node) const{convertNodeTree(node); };
+	void convertAddon(PakNode *node) const { convertNodeTree(node); };
 
 private:
 	bool convertNodeTree(PakNode *node) const;
 	void convertImage(PakNode *node) const;
-	void upscaleImage(SimuImage &data) const;
+	void enlargeImage(SimuImage &data) const;
 	bool addImageMargin(SimuImage &image) const;
 };

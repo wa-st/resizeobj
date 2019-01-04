@@ -1,0 +1,12 @@
+Debug/
+Release/
+ipch/
+.vs/
+*.VC.db
+*.VC.VC.opendb
+*.user
+
+makepng/
+resizeobjtest/
+REF_paks/
+REF_ref/

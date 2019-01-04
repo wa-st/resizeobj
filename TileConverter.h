@@ -2,13 +2,13 @@
 
 #include "paknode.h"
 #include "SimuImage.h"
-#include "ImgConverter.h"
+#include "ShrinkConverter.h"
 
 class TileConverter
 {
 private:
 	bool m_noAnimation;
-	ImgConverter *m_ic;
+	ShrinkConverter *m_shrinkConverter;
 protected:
 	void convertNodeTree(PakNode *node) const;
 	void convertFactorySmoke(PakNode *node) const;
@@ -22,10 +22,10 @@ protected:
 	void convertSmokeTreeImage(PakNode *node) const;
 public:
 	// アニメーションを無効化する
-	void setNoAnimation(bool val){ m_noAnimation = val; };
-	bool noAnimation(){return m_noAnimation; }
+	void setNoAnimation(bool val) { m_noAnimation = val; };
+	bool noAnimation() { return m_noAnimation; }
 	// カーソル画像・フィールド縮小用
-	void imgConverter(ImgConverter *ic){ m_ic = ic; };
+	void setShrinkConverter(ShrinkConverter *ic) { m_shrinkConverter = ic; };
 
 	// アドオンを変換する
 	void convertAddon(PakNode *node) const { convertNodeTree(node); };
